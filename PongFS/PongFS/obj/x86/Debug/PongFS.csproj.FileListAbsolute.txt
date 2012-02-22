@@ -1,0 +1,17 @@
+F:\code\c\PongFS\PongFS\PongFS\bin\x86\Debug\PongFS.exe
+F:\code\c\PongFS\PongFS\PongFS\bin\x86\Debug\PongFS.pdb
+F:\code\c\PongFS\PongFS\PongFS\obj\x86\Debug\ResolveAssemblyReference.cache
+F:\code\c\PongFS\PongFS\PongFS\obj\x86\Debug\Microsoft.Xna.Framework.RuntimeProfile.txt
+F:\code\c\PongFS\PongFS\PongFS\obj\x86\Debug\PongFS.exe
+F:\code\c\PongFS\PongFS\PongFS\obj\x86\Debug\PongFS.pdb
+F:\code\c\PongFS\PongFS\PongFS\bin\x86\Debug\PongFS.exe.config
+F:\code\c\PongFS\PongFS\PongFS\bin\x86\Debug\Content\images\background.xnb
+F:\code\c\PongFS\PongFS\PongFS\bin\x86\Debug\Content\images\ball.xnb
+F:\code\c\PongFS\PongFS\PongFS\bin\x86\Debug\Content\images\elroy.xnb
+F:\code\c\PongFS\PongFS\PongFS\bin\x86\Debug\Content\images\ball-shadow.xnb
+F:\code\c\PongFS\PongFS\PongFS\bin\x86\Debug\Content\images\background.jpg
+F:\code\c\PongFS\PongFS\PongFS\bin\x86\Debug\Content\images\fire.xnb
+F:\code\c\PongFS\PongFS\PongFS\bin\x86\Debug\Content\images\smoke.xnb
+F:\code\c\PongFS\PongFS\PongFS\bin\x86\Debug\Content\images\wall.xnb
+F:\code\c\PongFS\PongFS\PongFS\bin\x86\Debug\Content\fonts\default.xnb
+F:\code\c\PongFS\PongFS\PongFS\bin\x86\Debug\Content\images\plasma.xnb
