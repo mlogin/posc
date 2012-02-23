@@ -29,7 +29,7 @@
       </Parameters>
       <Options>None</Options>
       <Output>F:\code\c\PongFS\PongFS\PongFS\bin\x86\Debug\Content\images\elroy.xnb</Output>
-      <Time>2012-02-20T00:22:26.2121091+01:00</Time>
+      <Time>2012-02-23T01:55:10.9130388+01:00</Time>
     </Item>
     <Item>
       <Source>images\ball-shadow.png</Source>
@@ -84,6 +84,42 @@
       <Options>None</Options>
       <Output>F:\code\c\PongFS\PongFS\PongFS\bin\x86\Debug\Content\images\plasma.xnb</Output>
       <Time>2012-02-22T19:25:44.7835727+01:00</Time>
+    </Item>
+    <Item>
+      <Source>images\spark.png</Source>
+      <Name>images\spark</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>F:\code\c\PongFS\PongFS\PongFS\bin\x86\Debug\Content\images\spark.xnb</Output>
+      <Time>2012-02-23T00:14:27.2073587+01:00</Time>
+    </Item>
+    <Item>
+      <Source>images\spark2.png</Source>
+      <Name>images\spark2</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>F:\code\c\PongFS\PongFS\PongFS\bin\x86\Debug\Content\images\spark2.xnb</Output>
+      <Time>2012-02-23T00:15:26.8267687+01:00</Time>
+    </Item>
+    <Item>
+      <Source>images\shadow.png</Source>
+      <Name>images\shadow</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>F:\code\c\PongFS\PongFS\PongFS\bin\x86\Debug\Content\images\shadow.xnb</Output>
+      <Time>2012-02-23T00:39:01.161664+01:00</Time>
+    </Item>
+    <Item>
+      <Source>images\ray.png</Source>
+      <Name>images\ray</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>F:\code\c\PongFS\PongFS\PongFS\bin\x86\Debug\Content\images\ray.xnb</Output>
+      <Time>2012-02-23T00:51:29.9674933+01:00</Time>
     </Item>
     <BuildSuccessful>true</BuildSuccessful>
     <Settings>

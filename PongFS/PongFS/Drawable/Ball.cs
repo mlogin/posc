@@ -83,6 +83,8 @@ namespace PongFS.Drawable
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
+            smokeEmitter.Position = Center;
+            fireEmitter.Position = Center;
             if (Speed.LengthSquared() > 40f)
             {
                 fireEmitter.Active = true;

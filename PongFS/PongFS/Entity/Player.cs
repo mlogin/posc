@@ -11,7 +11,6 @@ namespace PongFS.Entity
 {
     public class Player
     {
-        private static int nbPlayers;
         private string name;
         public List<Wall> Walls { get; set; }
         public Character Sprite { get; set; }
@@ -22,35 +21,27 @@ namespace PongFS.Entity
         private Game game;
         private Character.PlayerPosition playerPosition;
 
-        public Player(Game game)
+        public Player(Game game, string name, Character.PlayerPosition playerPosition, string powerTex)
         {
             this.game = game;
             Walls = new List<Wall>();
             isIA = true;
-            Player.nbPlayers++;
-            name = "elroy-" + Player.nbPlayers.ToString();
-            if (Player.nbPlayers == 1)
-            {
-                playerPosition = Character.PlayerPosition.Top;
-            }
-            else
-            {
-                playerPosition = Character.PlayerPosition.Bottom;
-            }
-            Sprite = new Character(game, name);
+            this.name = name;
+            this.playerPosition = playerPosition;
+            Sprite = new Character(game, "elroy-" + name, playerPosition, powerTex);
             Sprite.ScreenPosition = playerPosition;
 
             for (var i = 0; i < 8; i++)
             {
-                Wall wall = new Wall(game, "wall-" + Player.nbPlayers.ToString() + i.ToString());
+                Wall wall = new Wall(game, "wall-" + name + "-" + i.ToString());
                 wall.ScreenPosition = playerPosition;
                 wall.InitialPosition = new Vector2(i * 62 + Engine.WIN_BORDER, playerPosition == Character.PlayerPosition.Top ? 0 : Engine.HEIGHT - 20);
-                wall.ModColor = Color.Red;
                 Walls.Add(wall);
             }
         }
         
-        public Player(Game game, KeyboardLayout layout) : this(game)
+        public Player(Game game, KeyboardLayout layout, string name, Character.PlayerPosition playerPosition, string powerTex) : 
+            this(game, name, playerPosition, powerTex)
         {
             kb = layout;
             isIA = false;
@@ -67,17 +58,25 @@ namespace PongFS.Entity
         {
             if (!isIA)
             {
-                Sprite.HandleKeys(keyboard, kb, ball);
+                Sprite.HandleKeys(keyboard, kb);
             }
             else // simple IA for now
             {
-                if (ball.Position.X < Sprite.Rect.Center.X)
+                if ((ball.Speed.Y < 0 && playerPosition == Character.PlayerPosition.Bottom) ||
+                    (ball.Speed.Y > 0 && playerPosition == Character.PlayerPosition.Top))
                 {
-                    //sprite.AccelerateWest();
+                    // the ball is leaving, go back to middle
+                    Rectangle safeZone = new Rectangle(Sprite.Bounds.Width / 2 - 10, Sprite.Bounds.Y, 20, Sprite.Bounds.Height);
+                    if (!Sprite.Rect.Intersects(safeZone))
+                    {
+                        float accel = Sprite.Rect.X < safeZone.X ? 0.1f : -0.1f;
+                        Sprite.Acceleration = new Vector2(accel, 0f);
+                    }
+
                 }
-                else if (ball.Position.X > Sprite.Rect.Center.X)
+                else // ball is coming back towards us, go meet it
                 {
-                    //sprite.AccelerateEast();
+                    Sprite.Acceleration = new Vector2(-1, -1);
                 }
 
             }

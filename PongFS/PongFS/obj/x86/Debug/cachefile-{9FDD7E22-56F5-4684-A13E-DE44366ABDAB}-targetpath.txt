@@ -7,4 +7,8 @@ Content\images\smoke.xnb
 Content\images\wall.xnb
 Content\fonts\default.xnb
 Content\images\plasma.xnb
+Content\images\spark.xnb
+Content\images\spark2.xnb
+Content\images\shadow.xnb
+Content\images\ray.xnb
 Content\images\background.jpg

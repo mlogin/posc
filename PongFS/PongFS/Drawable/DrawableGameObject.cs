@@ -49,7 +49,7 @@ namespace PongFS.Drawable
         protected int screenWidth;
         protected int screenHeight;
         protected int width, height;
-        private string key;
+        protected string texKey, id;
 
         // animation
         protected bool animated = false;
@@ -58,7 +58,8 @@ namespace PongFS.Drawable
 
         public DrawableGameObject(Game game, string key) : base(game)
         {
-            this.key = key.Split('-')[0];
+            this.texKey = key.Split('-')[0];
+            this.id = key;
             ComponentFactory.getFactory().Add(key, this);
         }
 
@@ -73,7 +74,7 @@ namespace PongFS.Drawable
         public virtual void LoadGraphics(SpriteBatch spriteBatch)
         {
             this.spriteBatch = spriteBatch;
-            SetTexture("images/" + key);
+            SetTexture("images/" + texKey);
             base.LoadContent();
             if (OnReady != null) OnReady(this, null);
         }
@@ -127,6 +128,7 @@ namespace PongFS.Drawable
                 if(OnOutOfBounds != null) OnOutOfBounds(this, null);
             }
 
+            Speed += Acceleration;
             Position += Speed;
 
         }
@@ -145,11 +147,11 @@ namespace PongFS.Drawable
         {
             if (animated && spriteSheetLoader != null)
             {
-                spriteBatch.Draw(texture, Position, spriteSheetLoader.GetCurrentAnimationFrame().rect, ModColor, Rotation, Vector2.Zero, Scaling, SpriteEffects.None, 1);
+                spriteBatch.Draw(texture, Position, spriteSheetLoader.GetCurrentAnimationFrame().rect, ModColor, Rotation, Vector2.Zero, Scaling, SpriteEffects.None, 0);
             }
             else
             {
-                spriteBatch.Draw(texture, Position, null, ModColor, Rotation, Vector2.Zero, Scaling, SpriteEffects.None, 1);
+                spriteBatch.Draw(texture, Position, null, ModColor, Rotation, Vector2.Zero, Scaling, SpriteEffects.None, 0);
             }
         }
 

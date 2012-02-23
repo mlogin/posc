@@ -15,3 +15,7 @@ F:\code\c\PongFS\PongFS\PongFS\bin\x86\Debug\Content\images\smoke.xnb
 F:\code\c\PongFS\PongFS\PongFS\bin\x86\Debug\Content\images\wall.xnb
 F:\code\c\PongFS\PongFS\PongFS\bin\x86\Debug\Content\fonts\default.xnb
 F:\code\c\PongFS\PongFS\PongFS\bin\x86\Debug\Content\images\plasma.xnb
+F:\code\c\PongFS\PongFS\PongFS\bin\x86\Debug\Content\images\spark.xnb
+F:\code\c\PongFS\PongFS\PongFS\bin\x86\Debug\Content\images\spark2.xnb
+F:\code\c\PongFS\PongFS\PongFS\bin\x86\Debug\Content\images\shadow.xnb
+F:\code\c\PongFS\PongFS\PongFS\bin\x86\Debug\Content\images\ray.xnb

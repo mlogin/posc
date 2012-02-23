@@ -115,6 +115,7 @@
     <Compile Include="Core\ComponentFactory.cs" />
     <Compile Include="Core\FrameRateCounter.cs" />
     <Compile Include="Drawable\DrawableGameObject.cs" />
+    <Compile Include="Entity\PowerUp.cs" />
     <Compile Include="Entity\Wall.cs" />
     <Compile Include="Physics\Force.cs" />
     <Compile Include="SpriteSheet\Frame.cs" />

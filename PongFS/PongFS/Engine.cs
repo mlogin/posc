@@ -42,14 +42,14 @@ namespace PongFS
 
         protected override void Initialize()
         {
-            player1 = new Player(this, new KeyboardLayout(KeyboardLayout.Default.Arrows));
-            player2 = new Player(this, new KeyboardLayout(KeyboardLayout.Default.QZSD));
+            player1 = new Player(this, new KeyboardLayout(KeyboardLayout.Default.Arrows), "player 1", Character.PlayerPosition.Top, "images/spark");
+            player2 = new Player(this, "player 2", Character.PlayerPosition.Bottom, "images/spark2");
             ball = new Ball(this, "ball");
             graphics.PreferredBackBufferWidth = WIDTH;
             graphics.PreferredBackBufferHeight = HEIGHT;
             graphics.ApplyChanges();
             Window.Title = "PongFS!";
-            FrameRateCounter FrameRateCounter = new FrameRateCounter(this, "Fonts\\Default");
+            FrameRateCounter FrameRateCounter = new FrameRateCounter(this, "fonts/default");
             this.Components.Add(FrameRateCounter);
             base.Initialize();
         }
@@ -86,8 +86,6 @@ namespace PongFS
             player1.HandleKeys(keyboard, ball);
             player2.HandleKeys(keyboard, ball);
             base.Update(gameTime);
-            ParticleFactory.getFactory().Get("fire").Position = ball.Center;
-            ParticleFactory.getFactory().Get("smoke").Position = ball.Center;
             ParticleFactory.getFactory().Update(gameTime);
         }
 
@@ -111,7 +109,7 @@ namespace PongFS
         private void DrawBackground()
         {
             Rectangle screenRectangle = new Rectangle(0, 0, screenWidth, screenHeight);
-            spriteBatch.Draw(background, screenRectangle, Color.White);
+            spriteBatch.Draw(background, screenRectangle, null, Color.White, 0, Vector2.Zero, SpriteEffects.None, 1);
         }
     }
 }
