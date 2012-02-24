@@ -15,7 +15,7 @@ namespace PongFS.Drawable
     {
         private const float START_SPEED = 3f;
         public static float MIN_SPEED = 3f;
-        private Emitter fireEmitter, smokeEmitter;
+        private Emitter fireEmitter, plasmaEmitter, smokeEmitter;
 
         public Ball(Game game, string id) : base(game, id) { }
 
@@ -42,6 +42,20 @@ namespace PongFS.Drawable
             fireEmitter.ParticleScaler = new ParticleScaler(0.3f, 0.6f, 0, 500);
             fireEmitter.Position = new Vector2(140, 580);
             ParticleFactory.getFactory().Add("fire", fireEmitter);
+
+            plasmaEmitter = new Emitter();
+            plasmaEmitter.Active = false;
+            plasmaEmitter.TextureList.Add(Game.Content.Load<Texture2D>("images\\plasma"));
+            plasmaEmitter.RandomEmissionInterval = new RandomMinMax(5);
+            plasmaEmitter.ParticleLifeTime = 1000;
+            plasmaEmitter.ParticleDirection = new RandomMinMax(0);
+            plasmaEmitter.ParticleSpeed = new RandomMinMax(0.02);
+            plasmaEmitter.ParticleRotation = new RandomMinMax(360);
+            plasmaEmitter.RotationSpeed = new RandomMinMax(0);
+            plasmaEmitter.ParticleFader = new ParticleFader(true, true, 200);
+            plasmaEmitter.ParticleScaler = new ParticleScaler(0.3f, 1f, 0, 500);
+            plasmaEmitter.Position = new Vector2(140, 580);
+            ParticleFactory.getFactory().Add("plasma", plasmaEmitter);
 
             smokeEmitter = new Emitter();
             smokeEmitter.Active = true;
@@ -85,13 +99,22 @@ namespace PongFS.Drawable
             base.Update(gameTime);
             smokeEmitter.Position = Center;
             fireEmitter.Position = Center;
-            if (Speed.LengthSquared() > 40f)
-            {
-                fireEmitter.Active = true;
-            }
-            else
+            plasmaEmitter.Position = Center;
+            float sq = Speed.LengthSquared();
+
+            if (sq < 40f)
             {
                 fireEmitter.Active = false;
+                plasmaEmitter.Active = false;
+            } else if (sq > 40f && sq < 100f)
+            {
+                fireEmitter.Active = true;
+                plasmaEmitter.Active = false;
+            }
+            else if(sq > 100f)
+            {
+                fireEmitter.Active = false;
+                plasmaEmitter.Active = true;
             }
         }
 

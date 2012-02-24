@@ -14,7 +14,7 @@ namespace PongFS.Drawable
     {
         public event EventHandler OnOutOfBounds;
         public event EventHandler OnReady;
-        protected SpriteBatch spriteBatch;
+        public SpriteBatch SpriteBatch { get; protected set; }
         protected Texture2D texture;
         public Vector2 InitialPosition { get; set; }
         public Vector2 Position
@@ -73,7 +73,7 @@ namespace PongFS.Drawable
 
         public virtual void LoadGraphics(SpriteBatch spriteBatch)
         {
-            this.spriteBatch = spriteBatch;
+            this.SpriteBatch = spriteBatch;
             SetTexture("images/" + texKey);
             base.LoadContent();
             if (OnReady != null) OnReady(this, null);
@@ -147,11 +147,11 @@ namespace PongFS.Drawable
         {
             if (animated && spriteSheetLoader != null)
             {
-                spriteBatch.Draw(texture, Position, spriteSheetLoader.GetCurrentAnimationFrame().rect, ModColor, Rotation, Vector2.Zero, Scaling, SpriteEffects.None, 0);
+                SpriteBatch.Draw(texture, Position, spriteSheetLoader.GetCurrentAnimationFrame().rect, ModColor, Rotation, Vector2.Zero, Scaling, SpriteEffects.None, 0);
             }
             else
             {
-                spriteBatch.Draw(texture, Position, null, ModColor, Rotation, Vector2.Zero, Scaling, SpriteEffects.None, 0);
+                SpriteBatch.Draw(texture, Position, null, ModColor, Rotation, Vector2.Zero, Scaling, SpriteEffects.None, 0);
             }
         }
 

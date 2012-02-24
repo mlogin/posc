@@ -1,6 +1,5 @@
 Content\images\background.xnb
 Content\images\ball.xnb
-Content\images\elroy.xnb
 Content\images\ball-shadow.xnb
 Content\images\fire.xnb
 Content\images\smoke.xnb
@@ -11,4 +10,6 @@ Content\images\spark.xnb
 Content\images\spark2.xnb
 Content\images\shadow.xnb
 Content\images\ray.xnb
+Content\images\powerups.xnb
+Content\images\player.xnb
 Content\images\background.jpg

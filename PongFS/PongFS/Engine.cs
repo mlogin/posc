@@ -23,14 +23,15 @@ namespace PongFS
         public const int WIDTH = 500;
         public const int HEIGHT = 700;
 
-        GraphicsDeviceManager graphics;
-        SpriteBatch spriteBatch;
-        Player player1, player2;
-        Ball ball;
-        Texture2D background;
-        int screenWidth, screenHeight;
-        SpriteFont VideoFont;
-
+        private GraphicsDeviceManager graphics;
+        private SpriteBatch spriteBatch;
+        private Player player1, player2;
+        private Ball ball;
+        private Texture2D background;
+        private int screenWidth, screenHeight;
+        private SpriteFont VideoFont;
+        private PowerUp currentPowerUp;
+        private Random rnd = new Random();        
 
         public Engine()
         {
@@ -42,9 +43,10 @@ namespace PongFS
 
         protected override void Initialize()
         {
-            player1 = new Player(this, new KeyboardLayout(KeyboardLayout.Default.Arrows), "player 1", Character.PlayerPosition.Top, "images/spark");
-            player2 = new Player(this, "player 2", Character.PlayerPosition.Bottom, "images/spark2");
+            player1 = new Player(this, new KeyboardLayout(KeyboardLayout.Default.Arrows), "p1", Character.PlayerPosition.Top, "images/spark");
+            player2 = new Player(this, "p2", Character.PlayerPosition.Bottom, "images/spark2");
             ball = new Ball(this, "ball");
+            currentPowerUp = new PowerUp(this, "powerups-" + ComponentFactory.getFactory().NewId());
             graphics.PreferredBackBufferWidth = WIDTH;
             graphics.PreferredBackBufferHeight = HEIGHT;
             graphics.ApplyChanges();
@@ -59,6 +61,7 @@ namespace PongFS
             spriteBatch = new SpriteBatch(GraphicsDevice);
             background = Content.Load<Texture2D>("images/background");
             ball.LoadGraphics(spriteBatch);
+            currentPowerUp.LoadGraphics(spriteBatch);
             for (int i = 0; i < player1.Walls.Count; i++)
             {
                 player1.Walls[i].LoadGraphics(spriteBatch);
@@ -69,6 +72,7 @@ namespace PongFS
             }
             player1.Sprite.LoadGraphics(spriteBatch);
             player2.Sprite.LoadGraphics(spriteBatch);
+
             VideoFont = Content.Load<SpriteFont>("fonts/default");
             
             screenWidth = GraphicsDevice.PresentationParameters.BackBufferWidth;
@@ -83,9 +87,14 @@ namespace PongFS
         protected override void Update(GameTime gameTime)
         {
             KeyboardState keyboard = Keyboard.GetState();
+            rnd.Next();
             player1.HandleKeys(keyboard, ball);
             player2.HandleKeys(keyboard, ball);
             base.Update(gameTime);
+            if (!currentPowerUp.Displayed && rnd.Next(PowerUp.SPAWN_RND) == 1)
+            {
+                currentPowerUp.ReInitialize();
+            }
             ParticleFactory.getFactory().Update(gameTime);
         }
 

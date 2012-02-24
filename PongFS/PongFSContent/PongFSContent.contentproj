@@ -57,8 +57,8 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="images\elroy.png">
-      <Name>elroy</Name>
+    <Compile Include="images\player.png">
+      <Name>player</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
       <ProcessorParameters_ColorKeyColor>77, 109, 243, 255</ProcessorParameters_ColorKeyColor>
@@ -130,6 +130,13 @@
   <ItemGroup>
     <Compile Include="images\ray.png">
       <Name>ray</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="images\powerups.png">
+      <Name>powerups</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>

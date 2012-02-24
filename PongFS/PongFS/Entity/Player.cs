@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using PongFS.Config;
 using PongFS.Drawable;
+using PongFS.Core;
 
 namespace PongFS.Entity
 {
@@ -27,8 +28,9 @@ namespace PongFS.Entity
             Walls = new List<Wall>();
             isIA = true;
             this.name = name;
+            ComponentFactory.getFactory().Add(name, this);
             this.playerPosition = playerPosition;
-            Sprite = new Character(game, "elroy-" + name, playerPosition, powerTex);
+            Sprite = new Character(game, "player-" + name, playerPosition, powerTex);
             Sprite.ScreenPosition = playerPosition;
 
             for (var i = 0; i < 8; i++)
@@ -51,6 +53,45 @@ namespace PongFS.Entity
         {
             isIA = true;
             iaLevel = difficulty;
+        }
+
+        internal void GrantPower(Power power)
+        {
+            switch (power.type)
+            {
+                case Power.PowerType.HealSingle:
+                    Walls.Sort(delegate(Wall a, Wall b) { return a.Life.CompareTo(b.Life); });
+                    Walls[0].Heal();
+                    break;
+                case Power.PowerType.HealAll:
+                    foreach (Wall wall in Walls)
+                    {
+                        wall.Heal();
+                    }
+                    break;
+                case Power.PowerType.Wall:
+                    CreateNewWallAt(Sprite.Position);
+                    break;
+                case Power.PowerType.Fortress:
+                    for (var i = 0; i < 8; i++)
+                    {
+                        CreateNewWallAt(new Vector2(i * 62 + Engine.WIN_BORDER, playerPosition == Character.PlayerPosition.Top ? 20 : Engine.HEIGHT - 40));
+                    }
+                    break;
+
+
+            }
+        }
+
+        private void CreateNewWallAt(Vector2 position)
+        {
+            Wall newWall = new Wall(game, "wall-" + ComponentFactory.getFactory().NewId());
+            newWall.ScreenPosition = playerPosition;
+            newWall.InitialPosition = position;
+            newWall.Position = position;
+            newWall.Initialize();
+            newWall.LoadGraphics(Sprite.SpriteBatch);
+            Walls.Add(newWall);
         }
 
         // PAss in the ball for IA
@@ -81,6 +122,5 @@ namespace PongFS.Entity
 
             }
         }
-
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
+using System.IO;
 
 namespace PongFS.Core
 {
@@ -10,7 +11,7 @@ namespace PongFS.Core
     {
         private Game game;
         private static ComponentFactory factory = null;
-        private Dictionary<String, IGameComponent> components = new Dictionary<string, IGameComponent>();
+        private Dictionary<String, Object> components = new Dictionary<string, Object>();
 
         private ComponentFactory() { }
 
@@ -28,21 +29,29 @@ namespace PongFS.Core
             this.game = game;
         }
 
-        public void Add(string key, IGameComponent component)
+        public void Add(string key, Object component)
         {
             if (key != null)
             {
                 components.Add(key, component);
-                game.Components.Add(component);
+                if (component is IGameComponent)
+                {
+                    game.Components.Add((IGameComponent)component);
+                }
             }
         }
 
-        public IGameComponent Get(string key)
+        public Object Get(string key)
         {
-            IGameComponent value = null;
+            Object value = null;
             components.TryGetValue(key, out value);
             return value;
         }
-                    
+
+
+        internal string NewId()
+        {
+            return Path.GetRandomFileName().Replace(".", "");
+        }
     }
 }

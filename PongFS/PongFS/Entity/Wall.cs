@@ -15,9 +15,9 @@ namespace PongFS.Entity
     public class Wall : DrawableGameObject
     {
         public int Life { get; set; }
-        private int maxLife;
+        public int MaxLife { get; private set; }
         private Color[] colors = new Color[]{
-            Color.DarkGray, Color.Red, Color.OrangeRed, Color.Orange, Color.Yellow, Color.GreenYellow, Color.Green
+            Color.DarkGray, Color.DarkRed, Color.Red, Color.OrangeRed, Color.Orange,  Color.DarkOrange, Color.Yellow, Color.Gold, Color.Goldenrod, Color.GreenYellow, Color.Green, Color.DarkGreen, Color.White
         };
         private Rectangle hitRegion;
         private Emitter explodeEmitter;
@@ -27,15 +27,18 @@ namespace PongFS.Entity
         public Wall(Game game, string id) : base(game, id) { }
         public event EventHandler OnDestroyed;
 
-        private static int test = 0;
-
         public override void Initialize()
         {
             base.Initialize();
             InitParticleEmitters();
-            maxLife = colors.Length;
-            Life = maxLife;
+            MaxLife = colors.Length - 1;
+            Heal();
             OnReady += new EventHandler(Wall_OnReady);
+        }
+
+        public void Heal()
+        {
+            Life = MaxLife;
         }
 
         private void InitParticleEmitters()
@@ -51,7 +54,7 @@ namespace PongFS.Entity
             explodeEmitter.RotationSpeed = new RandomMinMax(0.03);
             explodeEmitter.ParticleFader = new ParticleFader(true, true, 20);
             explodeEmitter.ParticleScaler = new ParticleScaler(0.3f, 50f, 0, 10000);
-            ParticleFactory.getFactory().Add("explode-" + id + "-" + ScreenPosition.ToString(), explodeEmitter);
+            ParticleFactory.getFactory().Add("explode-" + ComponentFactory.getFactory().NewId(), explodeEmitter);
         }
 
         void Wall_OnReady(object sender, EventArgs e)
@@ -72,6 +75,7 @@ namespace PongFS.Entity
 
         public override void Update(GameTime gameTime)
         {
+            ModColor = colors[Life];
             base.Update(gameTime);
             if (Life < 0 && gameTime.TotalGameTime - timeExplosion > TimeSpan.FromSeconds(3))
             {
@@ -98,10 +102,6 @@ namespace PongFS.Entity
                 {
                     if (!explodeEmitter.Active) timeExplosion = gameTime.TotalGameTime;
                     explodeEmitter.Active = true;
-                }
-                else
-                {
-                    ModColor = colors[Life];
                 }
                 speedX = ball.Speed.X;
                 ball.Speed = new Vector2(speedX, speedY);

@@ -188,9 +188,10 @@ namespace PongFS.Drawable
         {
             Vector2 shadowPosition = new Vector2(Position.X - Width/2, Position.Y + 24);
             base.Draw(gameTime);
-            spriteBatch.Draw(textureShadow, shadowPosition, null, Color.White, 0, Vector2.Zero, new Vector2((float)2 * Width / textureShadow.Width, 0.8f), SpriteEffects.None, 0.9f);
+            SpriteBatch.Draw(textureShadow, shadowPosition, null, Color.White, 0, Vector2.Zero, new Vector2((float)2 * Width / textureShadow.Width, 0.8f), SpriteEffects.None, 0.9f);
 
         }
+
 
         public void HandleKeys(KeyboardState keyboard, KeyboardLayout kb)
         {

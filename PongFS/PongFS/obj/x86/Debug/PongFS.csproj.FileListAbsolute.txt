@@ -7,7 +7,6 @@ F:\code\c\PongFS\PongFS\PongFS\obj\x86\Debug\PongFS.pdb
 F:\code\c\PongFS\PongFS\PongFS\bin\x86\Debug\PongFS.exe.config
 F:\code\c\PongFS\PongFS\PongFS\bin\x86\Debug\Content\images\background.xnb
 F:\code\c\PongFS\PongFS\PongFS\bin\x86\Debug\Content\images\ball.xnb
-F:\code\c\PongFS\PongFS\PongFS\bin\x86\Debug\Content\images\elroy.xnb
 F:\code\c\PongFS\PongFS\PongFS\bin\x86\Debug\Content\images\ball-shadow.xnb
 F:\code\c\PongFS\PongFS\PongFS\bin\x86\Debug\Content\images\background.jpg
 F:\code\c\PongFS\PongFS\PongFS\bin\x86\Debug\Content\images\fire.xnb
@@ -19,3 +18,5 @@ F:\code\c\PongFS\PongFS\PongFS\bin\x86\Debug\Content\images\spark.xnb
 F:\code\c\PongFS\PongFS\PongFS\bin\x86\Debug\Content\images\spark2.xnb
 F:\code\c\PongFS\PongFS\PongFS\bin\x86\Debug\Content\images\shadow.xnb
 F:\code\c\PongFS\PongFS\PongFS\bin\x86\Debug\Content\images\ray.xnb
+F:\code\c\PongFS\PongFS\PongFS\bin\x86\Debug\Content\images\powerups.xnb
+F:\code\c\PongFS\PongFS\PongFS\bin\x86\Debug\Content\images\player.xnb
