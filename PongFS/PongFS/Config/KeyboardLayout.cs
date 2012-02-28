@@ -8,6 +8,7 @@ namespace PongFS.Config
 {
     public class KeyboardLayout
     {
+        public Default DefaultLayout { get; private set; }
         public Keys KeyUp{get;set;}
         public Keys KeyDown{get;set;}
         public Keys KeyLeft{get;set;}
@@ -18,6 +19,7 @@ namespace PongFS.Config
 
         public KeyboardLayout(Default defaultSet)
         {
+            DefaultLayout = defaultSet;
             switch(defaultSet){
                 case Default.Arrows: default:
                     KeyUp = Keys.Up;
@@ -43,5 +45,13 @@ namespace PongFS.Config
             }
         }
 
+        public KeyboardLayout Reversed()
+        {
+            KeyboardLayout layout = new KeyboardLayout(DefaultLayout);
+            Keys tmpKey = KeyRight;
+            layout.KeyRight = KeyLeft;
+            layout.KeyLeft = tmpKey;
+            return layout;
+        }
     }
 }

@@ -32,6 +32,8 @@ namespace X2DPE
 		public RandomMinMax RotationSpeed { get; set; }
 		public ParticleFader ParticleFader { get; set; } // Fader settings
 		public ParticleScaler ParticleScaler { get; set; } // scale settings
+        public Color ParticleColor { get; set; }
+        public Color ModColor{get;set;}
 		public int Opacity { get; set; }
 
 		private int i = 0;
@@ -84,8 +86,13 @@ namespace X2DPE
 					particle.Rotation += particle.RotationSpeed;
 					ParticleScaler.Scale(particle, ParticleLifeTime);
 					particle.Fade = ParticleFader.Fade(particle, ParticleLifeTime);
-					particle.Color = new Color(particle.Fade, particle.Fade, particle.Fade, particle.Fade);
-
+                    if (ModColor != Color.Transparent)
+                    {
+                        particle.Color = new Color(ModColor.R, ModColor.G, ModColor.B, particle.Fade);
+                    } else {
+                        particle.Color = new Color(particle.Fade, particle.Fade, particle.Fade, particle.Fade);
+                    }
+                    int a = particle.Color.R;
 					if (particle.TotalLifetime > ParticleLifeTime)
 					{
 						ParticleList.Remove(particle);
@@ -99,12 +106,12 @@ namespace X2DPE
 			if (i > TextureList.Count - 1) i = 0;
 
 			Particle particle = new Particle(TextureList[i],
-																			 Position,
-																			 (float)emitterHelper.RandomizedDouble(ParticleSpeed),
-																			 (float)emitterHelper.RandomizedDouble(ParticleDirection),
-																			 MathHelper.ToRadians((float)emitterHelper.RandomizedDouble(ParticleRotation)),
-																			 (float)emitterHelper.RandomizedDouble(RotationSpeed),
-																			 Opacity);
+									            Position,
+									            (float)emitterHelper.RandomizedDouble(ParticleSpeed),
+									            (float)emitterHelper.RandomizedDouble(ParticleDirection),
+									            MathHelper.ToRadians((float)emitterHelper.RandomizedDouble(ParticleRotation)),
+									            (float)emitterHelper.RandomizedDouble(RotationSpeed),
+									            Opacity);
 			ParticleList.Add(particle);
 			EmittedNewParticle = true;
 			LastEmittedParticle = particle;
@@ -116,14 +123,14 @@ namespace X2DPE
 			foreach (Particle particle in ParticleList)
 			{
 				spriteBatch.Draw(particle.Texture,
-												 particle.Position,
-												 null,
-												 particle.Color,
-												 particle.Rotation,
-												 particle.Center,
-												 particle.Scale,
-												 SpriteEffects.None,
-												 0);
+								    particle.Position,
+								    null,
+								    particle.Color,
+								    particle.Rotation,
+								    particle.Center,
+								    particle.Scale,
+								    SpriteEffects.None,
+								    0);
 			}
 		}
 	}

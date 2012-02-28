@@ -10,6 +10,7 @@ namespace PongFS.Entity
         // type set in order for sprite
         public enum PowerType
         {
+            None = -1,
             HealAll = 0,
             ReverseKeys = 1,
             Power = 2,
@@ -24,5 +25,13 @@ namespace PongFS.Entity
 
         public PowerType type;
         public TimeSpan acquired;
+
+        public static Power None
+        {
+            get
+            {
+                return new Power { type = PowerType.None };
+            }
+        }
     }
 }

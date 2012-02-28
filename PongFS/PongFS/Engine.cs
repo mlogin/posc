@@ -11,7 +11,6 @@ using Microsoft.Xna.Framework.Media;
 using PongFS.Config;
 using PongFS.Drawable;
 using PongFS.Core;
-//using PongFS.Particles;
 using PongFS.Entity;
 using PongFS.X2DPE;
 
@@ -31,14 +30,19 @@ namespace PongFS
         private int screenWidth, screenHeight;
         private SpriteFont VideoFont;
         private PowerUp currentPowerUp;
-        private Random rnd = new Random();        
+        private Random rnd = new Random();
+        private List<Song> songs = new List<Song>();
+        private int currentTrackIndex;
+        private const int NB_MUSIC_TRACKS = 5;
 
         public Engine()
         {
             graphics = new GraphicsDeviceManager(this);
             ComponentFactory.getFactory().Initialize(this);
             ParticleFactory.getFactory().Initialize(this);
+            SoundFactory.getFactory().Initialize(this);
             Content.RootDirectory = "Content";
+            currentTrackIndex = rnd.Next(NB_MUSIC_TRACKS);
         }
 
         protected override void Initialize()
@@ -62,6 +66,18 @@ namespace PongFS
             background = Content.Load<Texture2D>("images/background");
             ball.LoadGraphics(spriteBatch);
             currentPowerUp.LoadGraphics(spriteBatch);
+            for (int i = 1; i < 6; i++)
+            {
+                songs.Add(Content.Load<Song>("music/0" + i));
+            }
+            SoundFactory.getFactory().Add("shot1", false);
+            SoundFactory.getFactory().Add("shot2", false);
+            SoundFactory.getFactory().Add("shot3", false);
+            SoundFactory.getFactory().Add("powerup", false);
+            SoundFactory.getFactory().Add("explosion", false);
+            SoundFactory.getFactory().Add("shields", false);
+            SoundFactory.getFactory().Add("shieldhit", false);
+            SoundFactory.getFactory().Add("charge", true);
             for (int i = 0; i < player1.Walls.Count; i++)
             {
                 player1.Walls[i].LoadGraphics(spriteBatch);
@@ -72,6 +88,8 @@ namespace PongFS
             }
             player1.Sprite.LoadGraphics(spriteBatch);
             player2.Sprite.LoadGraphics(spriteBatch);
+            player1.SetOpponent(player2);
+            player2.SetOpponent(player1);
 
             VideoFont = Content.Load<SpriteFont>("fonts/default");
             
@@ -88,14 +106,24 @@ namespace PongFS
         {
             KeyboardState keyboard = Keyboard.GetState();
             rnd.Next();
-            player1.HandleKeys(keyboard, ball);
-            player2.HandleKeys(keyboard, ball);
+            player1.HandleKeys(keyboard);
+            player2.HandleKeys(keyboard);
+            UpdateMusic();
             base.Update(gameTime);
             if (!currentPowerUp.Displayed && rnd.Next(PowerUp.SPAWN_RND) == 1)
             {
                 currentPowerUp.ReInitialize();
             }
             ParticleFactory.getFactory().Update(gameTime);
+        }
+
+        private void UpdateMusic()
+        {
+            if (MediaPlayer.State.Equals(MediaState.Stopped))
+            {
+                MediaPlayer.Play(songs[currentTrackIndex]);
+                currentTrackIndex = (currentTrackIndex + 1) % (songs.Count - 1);
+            }
         }
 
         protected override void Draw(GameTime gameTime)

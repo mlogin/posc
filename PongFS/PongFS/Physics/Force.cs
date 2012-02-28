@@ -6,15 +6,36 @@ using Microsoft.Xna.Framework;
 
 namespace PongFS.Physics
 {
-    public class Force
+    public struct Force
     {
-        public Vector2 Speed { get; set; }
-        public Vector2 Acceleration { get; set; }
-        public bool Enabled { get; set; }
+        public Vector2 speed;
+        public Vector2 acceleration;
+        public bool enabled;
 
-        public Force()
+        public static Force GroundFriction
         {
-            Enabled = true;
+            get
+            {
+                return new Force { enabled = true, speed = new Vector2(0.85f) };
+            }
         }
+
+        public static Force HighSpeedFriction
+        {
+            get
+            {
+                return new Force { enabled = true, speed = new Vector2(0.8f) };
+            }
+        }
+
+        public static Force IceFriction
+        {
+            get
+            {
+                return new Force { enabled = true, speed = new Vector2(0.95f) };
+            }
+        }
+
+
     }
 }

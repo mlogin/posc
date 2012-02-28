@@ -32,6 +32,7 @@ namespace PongFS.Entity
             this.playerPosition = playerPosition;
             Sprite = new Character(game, "player-" + name, playerPosition, powerTex);
             Sprite.ScreenPosition = playerPosition;
+            Sprite.IA = true;
 
             for (var i = 0; i < 8; i++)
             {
@@ -47,6 +48,7 @@ namespace PongFS.Entity
         {
             kb = layout;
             isIA = false;
+            Sprite.IA = false;
         }
 
         private void SetIALevel(int difficulty)
@@ -62,23 +64,31 @@ namespace PongFS.Entity
                 case Power.PowerType.HealSingle:
                     Walls.Sort(delegate(Wall a, Wall b) { return a.Life.CompareTo(b.Life); });
                     Walls[0].Heal();
+                    SoundFactory.getFactory().Play("shields", true);
                     break;
                 case Power.PowerType.HealAll:
                     foreach (Wall wall in Walls)
                     {
                         wall.Heal();
                     }
+                    SoundFactory.getFactory().Play("shields", true);
                     break;
                 case Power.PowerType.Wall:
                     CreateNewWallAt(Sprite.Position);
+                    SoundFactory.getFactory().Play("shields", true);
                     break;
                 case Power.PowerType.Fortress:
                     for (var i = 0; i < 8; i++)
                     {
                         CreateNewWallAt(new Vector2(i * 62 + Engine.WIN_BORDER, playerPosition == Character.PlayerPosition.Top ? 20 : Engine.HEIGHT - 40));
                     }
+                    SoundFactory.getFactory().Play("shields", true);
                     break;
-
+                default:
+                    SoundFactory.getFactory().Play("powerup", true);
+                    Sprite.CurrentPower = power;
+                    break;
+                    
 
             }
         }
@@ -91,11 +101,12 @@ namespace PongFS.Entity
             newWall.Position = position;
             newWall.Initialize();
             newWall.LoadGraphics(Sprite.SpriteBatch);
+            newWall.IsBonus = true;
             Walls.Add(newWall);
         }
 
         // PAss in the ball for IA
-        public void HandleKeys(Microsoft.Xna.Framework.Input.KeyboardState keyboard, Ball ball)
+        public void HandleKeys(Microsoft.Xna.Framework.Input.KeyboardState keyboard)
         {
             if (!isIA)
             {
@@ -103,24 +114,13 @@ namespace PongFS.Entity
             }
             else // simple IA for now
             {
-                if ((ball.Speed.Y < 0 && playerPosition == Character.PlayerPosition.Bottom) ||
-                    (ball.Speed.Y > 0 && playerPosition == Character.PlayerPosition.Top))
-                {
-                    // the ball is leaving, go back to middle
-                    Rectangle safeZone = new Rectangle(Sprite.Bounds.Width / 2 - 10, Sprite.Bounds.Y, 20, Sprite.Bounds.Height);
-                    if (!Sprite.Rect.Intersects(safeZone))
-                    {
-                        float accel = Sprite.Rect.X < safeZone.X ? 0.1f : -0.1f;
-                        Sprite.Acceleration = new Vector2(accel, 0f);
-                    }
-
-                }
-                else // ball is coming back towards us, go meet it
-                {
-                    Sprite.Acceleration = new Vector2(-1, -1);
-                }
-
+                Sprite.HandleIA();
             }
+        }
+
+        public void SetOpponent(Player player)
+        {
+            Sprite.Opponent = player.Sprite;
         }
     }
 }

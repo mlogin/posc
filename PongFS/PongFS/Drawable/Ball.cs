@@ -15,7 +15,10 @@ namespace PongFS.Drawable
     {
         private const float START_SPEED = 3f;
         public static float MIN_SPEED = 3f;
+        public static float FIRE_SPEED = 40f;
+        public static float PLASMA_SPEED = 100f;
         private Emitter fireEmitter, plasmaEmitter, smokeEmitter;
+        public bool IsCrazy;
 
         public Ball(Game game, string id) : base(game, id) { }
 
@@ -96,22 +99,24 @@ namespace PongFS.Drawable
 
         public override void Update(GameTime gameTime)
         {
+            Speed = new Vector2(Speed.X + (IsCrazy ? 2*(float)Math.Cos(Speed.X):0), Speed.Y);
             base.Update(gameTime);
             smokeEmitter.Position = Center;
             fireEmitter.Position = Center;
             plasmaEmitter.Position = Center;
             float sq = Speed.LengthSquared();
 
-            if (sq < 40f)
+            if (sq < FIRE_SPEED)
             {
                 fireEmitter.Active = false;
                 plasmaEmitter.Active = false;
-            } else if (sq > 40f && sq < 100f)
+            }
+            else if (sq > FIRE_SPEED && sq < PLASMA_SPEED)
             {
                 fireEmitter.Active = true;
                 plasmaEmitter.Active = false;
             }
-            else if(sq > 100f)
+            else if (sq > PLASMA_SPEED)
             {
                 fireEmitter.Active = false;
                 plasmaEmitter.Active = true;

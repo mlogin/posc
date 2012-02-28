@@ -113,7 +113,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\ComponentFactory.cs" />
+    <Compile Include="Core\SoundFactory.cs" />
     <Compile Include="Core\FrameRateCounter.cs" />
+    <Compile Include="Core\Primitives2d.cs" />
     <Compile Include="Drawable\DrawableGameObject.cs" />
     <Compile Include="Entity\Power.cs" />
     <Compile Include="Entity\PowerUp.cs" />

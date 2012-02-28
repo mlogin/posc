@@ -16,6 +16,7 @@ namespace PongFS.Entity
     {
         public int Life { get; set; }
         public int MaxLife { get; private set; }
+        public bool IsBonus { get; set; }
         private Color[] colors = new Color[]{
             Color.DarkGray, Color.DarkRed, Color.Red, Color.OrangeRed, Color.Orange,  Color.DarkOrange, Color.Yellow, Color.Gold, Color.Goldenrod, Color.GreenYellow, Color.Green, Color.DarkGreen, Color.White
         };
@@ -75,7 +76,10 @@ namespace PongFS.Entity
 
         public override void Update(GameTime gameTime)
         {
-            ModColor = colors[Life];
+            if (Life >= 0)
+            {
+                ModColor = colors[Life];
+            }
             base.Update(gameTime);
             if (Life < 0 && gameTime.TotalGameTime - timeExplosion > TimeSpan.FromSeconds(3))
             {
@@ -83,8 +87,9 @@ namespace PongFS.Entity
                 if (OnDestroyed != null) OnDestroyed(this, null);
             }
             Ball ball = (Ball)ComponentFactory.getFactory().Get("ball");
-            if (hitRegion.Intersects(ball.Rect))
+            if (hitRegion.Intersects(ball.Rect) && Visible)
             {
+                SoundFactory.getFactory().Play("shieldhit", true);
                 int dir = ScreenPosition == Character.PlayerPosition.Top ? 1 : -1;
                 float speedX, speedY;
                 speedY = dir * (Math.Abs(ball.Speed.Y) * 2f / 3);
@@ -100,8 +105,13 @@ namespace PongFS.Entity
                 Life -= (int) Math.Ceiling(Math.Abs(ball.Speed.Y) / 5);
                 if (Life < 0)
                 {
-                    if (!explodeEmitter.Active) timeExplosion = gameTime.TotalGameTime;
-                    explodeEmitter.Active = true;
+                    Visible = false;
+                    if (!IsBonus)
+                    {
+                        SoundFactory.getFactory().Play("explosion", true);
+                        if (!explodeEmitter.Active) timeExplosion = gameTime.TotalGameTime;
+                        explodeEmitter.Active = true;
+                    }
                 }
                 speedX = ball.Speed.X;
                 ball.Speed = new Vector2(speedX, speedY);

@@ -11,8 +11,8 @@ namespace PongFS.Entity
 {
     public class PowerUp : DrawableGameObject
     {
-        private const double TIME_ACTIVE = 10;
-        public static int SPAWN_RND = 300;
+        public const double TIME_ACTIVE = 20;
+        public static int SPAWN_RND = 1000;
 
         public bool Displayed { get; set; }
         public Power.PowerType PowerUpType { get; set; }
@@ -24,7 +24,7 @@ namespace PongFS.Entity
         public void ReInitialize()
         {
             Array types = Enum.GetValues(typeof(Power.PowerType));
-            PowerUpType = Power.PowerType.Fortress; //  (Power.PowerType)types.GetValue(rnd.Next(types.Length));
+            PowerUpType = (Power.PowerType)types.GetValue(rnd.Next(types.Length - 1));
             InitialPosition = new Vector2(rnd.Next(Engine.WIDTH), (Engine.HEIGHT - Height) / 2);
             float posX = (InitialPosition.X + 1) % Engine.WIDTH;
             float posY = 50 * (float)Math.Sin(posX * Math.PI / 250) + (Engine.HEIGHT - Height) / 2;
@@ -87,8 +87,19 @@ namespace PongFS.Entity
                 if (hitRegion.Intersects(ball.Rect))
                 {
                     string playerId = "p" + (ball.Speed.Y > 0 ? "1" : "2");
+                    string opponentId = "p" + (ball.Speed.Y < 0 ? "1" : "2");
                     Player player = (Player)ComponentFactory.getFactory().Get(playerId);
-                    player.GrantPower(new Power { type = PowerUpType, acquired = gameTime.TotalGameTime });
+                    Player opponent = (Player)ComponentFactory.getFactory().Get(opponentId);
+                    if (PowerUpType == Power.PowerType.ReverseKeys || 
+                        PowerUpType == Power.PowerType.Ice ||
+                        PowerUpType == Power.PowerType.RevealAim) // CURSE POWER!
+                    {
+                        opponent.GrantPower(new Power { type = PowerUpType, acquired = gameTime.TotalGameTime });
+                    }
+                    else
+                    {
+                        player.GrantPower(new Power { type = PowerUpType, acquired = gameTime.TotalGameTime });
+                    }
                     this.Displayed = false;
                 }
             }

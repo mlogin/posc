@@ -35,6 +35,7 @@ namespace PongFS.Drawable
         public Vector2 Speed { get; set; }
         protected Vector2 MaxSpeed { get; set; }
         public Vector2 Acceleration { get; set; }
+        protected Vector2 MaxAcceleration { get; set; }
         public Vector2 Scaling { get; set; }
         public float Rotation { get; set; }
         public Color ModColor { get; set; }
@@ -49,6 +50,7 @@ namespace PongFS.Drawable
         protected int screenWidth;
         protected int screenHeight;
         protected int width, height;
+        public bool Visible { get; set; }
         protected string texKey, id;
 
         // animation
@@ -61,6 +63,7 @@ namespace PongFS.Drawable
             this.texKey = key.Split('-')[0];
             this.id = key;
             ComponentFactory.getFactory().Add(key, this);
+            Visible = true;
         }
 
         public override void Initialize()
@@ -89,7 +92,7 @@ namespace PongFS.Drawable
             }
 
             // apply forces
-            foreach (Force force in forces.FindAll(x => x.Enabled))
+            foreach (Force force in forces.FindAll(x => x.enabled))
             {
                 ApplyForce(force);
             }
@@ -105,13 +108,13 @@ namespace PongFS.Drawable
             {
                 if (Rect.Left < Bounds.Left)
                 {
-                    Position = new Vector2(Bounds.Left, Position.Y);
-                    if (BounceOffBounds) Speed = new Vector2(-Speed.X, Speed.Y);
+                    Position = new Vector2(Bounds.Left , Position.Y);
+                    Speed = new Vector2(BounceOffBounds ? -Speed.X : 0, Speed.Y);
                 }
                 else if (Rect.Right > Bounds.Right)
                 {
-                    Position = new Vector2(Bounds.Right - Width, Position.Y);
-                    if (BounceOffBounds) Speed = new Vector2(-Speed.X, Speed.Y);
+                    Position = new Vector2(Bounds.Right - Rect.Width, Position.Y);
+                    Speed = new Vector2(BounceOffBounds ? -Speed.X : 0, Speed.Y);
                 }
 
                 if (Rect.Top < Bounds.Top)
@@ -135,8 +138,8 @@ namespace PongFS.Drawable
 
         private void ApplyForce(Force force)
         {
-            Acceleration *= force.Acceleration;
-            Speed *= force.Speed;
+            Acceleration *= force.acceleration;
+            Speed *= force.speed;
             if (Speed.LengthSquared() < 0.15f)
             {
                 Speed = Vector2.Zero;
@@ -145,13 +148,16 @@ namespace PongFS.Drawable
 
         public override void Draw(GameTime gameTime)
         {
-            if (animated && spriteSheetLoader != null)
+            if (Visible)
             {
-                SpriteBatch.Draw(texture, Position, spriteSheetLoader.GetCurrentAnimationFrame().rect, ModColor, Rotation, Vector2.Zero, Scaling, SpriteEffects.None, 0);
-            }
-            else
-            {
-                SpriteBatch.Draw(texture, Position, null, ModColor, Rotation, Vector2.Zero, Scaling, SpriteEffects.None, 0);
+                if (animated && spriteSheetLoader != null)
+                {
+                    SpriteBatch.Draw(texture, Position, spriteSheetLoader.GetCurrentAnimationFrame().rect, ModColor, Rotation, Vector2.Zero, Scaling, SpriteEffects.None, 0);
+                }
+                else
+                {
+                    SpriteBatch.Draw(texture, Position, null, ModColor, Rotation, Vector2.Zero, Scaling, SpriteEffects.None, 0);
+                }
             }
         }
 
