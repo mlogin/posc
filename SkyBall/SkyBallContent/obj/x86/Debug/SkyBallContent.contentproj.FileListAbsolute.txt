@@ -1,0 +1,2 @@
+F:\code\c\PongFS\PongFS\PongFSContent\obj\x86\Debug\ResolveAssemblyReference.cache
+F:\code\c\SkyBall\SkyBall\SkyBallContent\obj\x86\Debug\ResolveAssemblyReference.cache
