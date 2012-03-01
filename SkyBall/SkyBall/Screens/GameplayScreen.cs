@@ -30,12 +30,9 @@ namespace SkyBall
         float pauseAlpha;
 
         public const int WIN_BORDER = 3;
-        private GraphicsDeviceManager graphics;
-        private SpriteBatch spriteBatch;
         private Player player1, player2;
         private Ball ball;
         private Texture2D background;
-        private int screenWidth, screenHeight;
         private SpriteFont VideoFont;
         private PowerUp currentPowerUp;
         private Random rnd = new Random();
@@ -50,8 +47,8 @@ namespace SkyBall
         {
             TransitionOnTime = TimeSpan.FromSeconds(1.5);
             TransitionOffTime = TimeSpan.FromSeconds(0.5);
-        }
 
+        }
 
         /// <summary>
         /// Load graphics content for the game.
@@ -59,60 +56,66 @@ namespace SkyBall
         public override void LoadContent()
         {
             if (content == null)
+            {
                 content = new ContentManager(ScreenManager.Game.Services, "Content");
+            }
 
-            ComponentFactory.getFactory().Initialize(ScreenManager.Game);
-            ParticleFactory.getFactory().Initialize(ScreenManager.Game);
-            SoundFactory.getFactory().Initialize(ScreenManager.Game);
-            currentTrackIndex = rnd.Next(NB_MUSIC_TRACKS);
+            LoadTextures();
+            LoadSounds();
+            
+            player1 = new Player("player1", Player.Side.Up, new KeyboardLayout(KeyboardLayout.Default.Arrows));
+            player2 = new Player("player2", Player.Side.Down);
+            player1.Opponent = player2;
+            player2.Opponent = player1;
+            ball = new Ball("ball");
+            currentPowerUp = new PowerUp("powerup");
 
-            player1 = new Player(ScreenManager.Game, new KeyboardLayout(KeyboardLayout.Default.Arrows), "p1", Character.PlayerPosition.Top, "images/spark");
-            player2 = new Player(ScreenManager.Game, "p2", Character.PlayerPosition.Bottom, "images/spark2");
-            ball = new Ball(ScreenManager.Game, "ball");
-            currentPowerUp = new PowerUp(ScreenManager.Game, "powerups-" + ComponentFactory.getFactory().NewId());
-            graphics.PreferredBackBufferWidth = GameConfig.WIDTH;
-            graphics.PreferredBackBufferHeight = GameConfig.HEIGHT;
-            graphics.ApplyChanges();
             FrameRateCounter FrameRateCounter = new FrameRateCounter(ScreenManager.Game, "fonts/default");
             ScreenManager.Game.Components.Add(FrameRateCounter);
 
             gameFont = content.Load<SpriteFont>("fonts/default");
 
-            spriteBatch = new SpriteBatch(ScreenManager.GraphicsDevice);
-            background = ScreenManager.Game.Content.Load<Texture2D>("images/background");
-            ball.LoadGraphics(spriteBatch);
-            currentPowerUp.LoadGraphics(spriteBatch);
+            currentTrackIndex = rnd.Next(NB_MUSIC_TRACKS);
             for (int i = 1; i < 6; i++)
             {
                 songs.Add(ScreenManager.Game.Content.Load<Song>("music/0" + i));
             }
-            SoundFactory.getFactory().Add("shot1", false);
-            SoundFactory.getFactory().Add("shot2", false);
-            SoundFactory.getFactory().Add("shot3", false);
-            SoundFactory.getFactory().Add("powerup", false);
-            SoundFactory.getFactory().Add("explosion", false);
-            SoundFactory.getFactory().Add("shields", false);
-            SoundFactory.getFactory().Add("shieldhit", false);
-            SoundFactory.getFactory().Add("charge", true);
-            for (int i = 0; i < player1.Walls.Count; i++)
-            {
-                player1.Walls[i].LoadGraphics(spriteBatch);
-            }
-            for (int i = 0; i < player2.Walls.Count; i++)
-            {
-                player2.Walls[i].LoadGraphics(spriteBatch);
-            }
-            player1.Sprite.LoadGraphics(spriteBatch);
-            player2.Sprite.LoadGraphics(spriteBatch);
-            player1.SetOpponent(player2);
-            player2.SetOpponent(player1);
 
+            background = TextureFactory.getFactory().Get("background");
             VideoFont = ScreenManager.Game.Content.Load<SpriteFont>("fonts/default");
 
-            screenWidth = GameConfig.WIDTH;
-            screenHeight = GameConfig.HEIGHT;
-
             ScreenManager.Game.ResetElapsedTime();
+        }
+
+        private void LoadSounds()
+        {
+            SoundFactory.getFactory().Initialize(content);
+            SoundFactory.getFactory().AddSound("shot1", "fx/shot1", false);
+            SoundFactory.getFactory().AddSound("shot2", "fx/shot2", false);
+            SoundFactory.getFactory().AddSound("shot3", "fx/shot3", false);
+            SoundFactory.getFactory().AddSound("powerup", "fx/powerup", false);
+            SoundFactory.getFactory().AddSound("explosion", "fx/explosion", false);
+            SoundFactory.getFactory().AddSound("shields", "fx/shields", false);
+            SoundFactory.getFactory().AddSound("shieldhit", "fx/shieldhit", false);
+            SoundFactory.getFactory().AddSound("charge", "fx/charge", true);
+        }
+
+        private void LoadTextures()
+        {
+            TextureFactory.getFactory().Initialize(content);
+            TextureFactory.getFactory().Add("background", "images/background");
+            TextureFactory.getFactory().Add("ball", "images/ball");
+            TextureFactory.getFactory().Add("dots", "images/dots");
+            TextureFactory.getFactory().Add("fire", "images/fire");
+            TextureFactory.getFactory().Add("plasma", "images/plasma");
+            TextureFactory.getFactory().Add("player", "images/player");
+            TextureFactory.getFactory().Add("powerups", "images/powerups");
+            TextureFactory.getFactory().Add("ray", "images/ray");
+            TextureFactory.getFactory().Add("shadow", "images/shadow");
+            TextureFactory.getFactory().Add("smoke", "images/smoke");
+            TextureFactory.getFactory().Add("spark", "images/spark");
+            TextureFactory.getFactory().Add("spark2", "images/spark2");
+            TextureFactory.getFactory().Add("wall", "images/wall");
         }
 
 
@@ -149,6 +152,9 @@ namespace SkyBall
                 {
                     currentPowerUp.ReInitialize();
                 }
+                ball.Update(gameTime);
+                player1.Update(gameTime);
+                player2.Update(gameTime);
                 ParticleFactory.getFactory().Update(gameTime);
 
             }
@@ -206,20 +212,20 @@ namespace SkyBall
 
             ScreenManager.GraphicsDevice.Clear(Color.Black);
 
-            // Our player and enemy are both actually just text strings.
-            SpriteBatch spriteBatch = ScreenManager.SpriteBatch;
-
-            spriteBatch.Begin();
+            ScreenManager.SpriteBatch.Begin();
             DrawBackground();
-            spriteBatch.End();
+            ScreenManager.SpriteBatch.End();
 
-            spriteBatch.Begin(SpriteSortMode.BackToFront, BlendState.Additive);
-            ParticleFactory.getFactory().Draw(gameTime, spriteBatch);
-            spriteBatch.End();
+            ScreenManager.SpriteBatch.Begin(SpriteSortMode.BackToFront, BlendState.Additive);
+            ParticleFactory.getFactory().Draw(gameTime, ScreenManager.SpriteBatch);
+            ScreenManager.SpriteBatch.End();
 
-            spriteBatch.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
-            base.Draw(gameTime);
-            spriteBatch.End();
+            ScreenManager.SpriteBatch.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
+            ball.Draw(gameTime, ScreenManager.SpriteBatch);
+            player1.Draw(gameTime, ScreenManager.SpriteBatch);
+            player2.Draw(gameTime, ScreenManager.SpriteBatch);
+
+            ScreenManager.SpriteBatch.End();
 
             // If the game is transitioning on or off, fade it out to black.
             if (TransitionPosition > 0 || pauseAlpha > 0)
@@ -232,8 +238,8 @@ namespace SkyBall
 
         private void DrawBackground()
         {
-            Rectangle screenRectangle = new Rectangle(0, 0, screenWidth, screenHeight);
-            spriteBatch.Draw(background, screenRectangle, null, Color.White, 0, Vector2.Zero, SpriteEffects.None, 1);
+            Rectangle screenRectangle = new Rectangle(0, 0, GameConfig.WIDTH, GameConfig.HEIGHT);
+            ScreenManager.SpriteBatch.Draw(background, screenRectangle, null, Color.White, 0, Vector2.Zero, SpriteEffects.None, 1);
         }
         
     }

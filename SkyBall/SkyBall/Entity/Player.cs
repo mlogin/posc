@@ -12,49 +12,54 @@ namespace SkyBall.Entity
 {
     public class Player
     {
-        private string name;
-        public List<Wall> Walls { get; set; }
-        public Character Sprite { get; set; }
-        public int Score { get; set; }
+        public enum Side { Up, Down }
+        public string Id { get; private set; }
+        private List<Wall> walls = new List<Wall>();
+        public Character Sprite { get; private set; }
         private KeyboardLayout kb;
-        private bool isIA = false;
-        private int iaLevel;
-        private Game game;
-        private Character.PlayerPosition playerPosition;
+        public bool IsNPC{get; set;}
+        public Side Placement{get; private set;}
+        public Player Opponent { get; set; }
 
-        public Player(Game game, string name, Character.PlayerPosition playerPosition, string powerTex)
+        public Player(string id, Side placement, KeyboardLayout layout = null)
         {
-            this.game = game;
-            Walls = new List<Wall>();
-            isIA = true;
-            this.name = name;
-            ComponentFactory.getFactory().Add(name, this);
-            this.playerPosition = playerPosition;
-            Sprite = new Character(game, "player-" + name, playerPosition, powerTex);
-            Sprite.ScreenPosition = playerPosition;
-            Sprite.IA = true;
+            Id = id;
+            if (layout == null)
+            {
+                IsNPC = true;
+            }
+            else
+            {
+                kb = layout;
+            }
+            Placement = placement;
+            InitializeWalls();
+            Sprite = new Character(this, TextureFactory.getFactory().Get("player"));
+        }
 
+        private void InitializeWalls()
+        {
             for (var i = 0; i < 8; i++)
             {
-                Wall wall = new Wall(game, "wall-" + name + "-" + i.ToString());
-                wall.ScreenPosition = playerPosition;
-                wall.InitialPosition = new Vector2(i * 62 + Engine.WIN_BORDER, playerPosition == Character.PlayerPosition.Top ? 0 : GameConfig.HEIGHT - 20);
-                Walls.Add(wall);
+                Vector2 position = Vector2.Zero;
+
+                if (Placement == Side.Down)
+                {
+                    position = new Vector2(i * 62 + GameConfig.WIN_BORDER, GameConfig.HEIGHT - 20);
+                }
+                else
+                {
+                    position = new Vector2(i * 62 + GameConfig.WIN_BORDER, 0);
+                }
+                CreateNewWallAt(position, false);
             }
         }
-        
-        public Player(Game game, KeyboardLayout layout, string name, Character.PlayerPosition playerPosition, string powerTex) : 
-            this(game, name, playerPosition, powerTex)
-        {
-            kb = layout;
-            isIA = false;
-            Sprite.IA = false;
-        }
 
-        private void SetIALevel(int difficulty)
+        private void CreateNewWallAt(Vector2 position, bool isExtra)
         {
-            isIA = true;
-            iaLevel = difficulty;
+            Wall newWall = new Wall(position);
+            newWall.IsBonus = isExtra;
+            walls.Add(newWall);
         }
 
         internal void GrantPower(Power power)
@@ -62,65 +67,59 @@ namespace SkyBall.Entity
             switch (power.type)
             {
                 case Power.PowerType.HealSingle:
-                    Walls.Sort(delegate(Wall a, Wall b) { return a.Life.CompareTo(b.Life); });
-                    Walls[0].Heal();
-                    SoundFactory.getFactory().Play("shields", true);
+                    walls.Sort(delegate(Wall a, Wall b) { return a.Life.CompareTo(b.Life); });
+                    walls[0].Heal();
+                    SoundFactory.getFactory().PlaySound("shields");
                     break;
                 case Power.PowerType.HealAll:
-                    foreach (Wall wall in Walls)
+                    foreach (Wall wall in walls)
                     {
                         wall.Heal();
                     }
-                    SoundFactory.getFactory().Play("shields", true);
+                    SoundFactory.getFactory().PlaySound("shields");
                     break;
                 case Power.PowerType.Wall:
-                    CreateNewWallAt(Sprite.Position);
-                    SoundFactory.getFactory().Play("shields", true);
+                    CreateNewWallAt(Sprite.Position, true);
+                    SoundFactory.getFactory().PlaySound("shields");
                     break;
                 case Power.PowerType.Fortress:
                     for (var i = 0; i < 8; i++)
                     {
-                        CreateNewWallAt(new Vector2(i * 62 + Engine.WIN_BORDER, playerPosition == Character.PlayerPosition.Top ? 20 : GameConfig.HEIGHT - 40));
+                        CreateNewWallAt(new Vector2(i * 62 + GameConfig.WIN_BORDER, Placement == Side.Up ? 20 : GameConfig.HEIGHT - 40), true);
                     }
-                    SoundFactory.getFactory().Play("shields", true);
+                    SoundFactory.getFactory().PlaySound("shields");
                     break;
                 default:
-                    SoundFactory.getFactory().Play("powerup", true);
+                    SoundFactory.getFactory().PlaySound("powerup");
                     Sprite.CurrentPower = power;
                     break;
                     
 
             }
         }
-
-        private void CreateNewWallAt(Vector2 position)
-        {
-            Wall newWall = new Wall(game, "wall-" + ComponentFactory.getFactory().NewId());
-            newWall.ScreenPosition = playerPosition;
-            newWall.InitialPosition = position;
-            newWall.Position = position;
-            newWall.Initialize();
-            newWall.LoadGraphics(Sprite.SpriteBatch);
-            newWall.IsBonus = true;
-            Walls.Add(newWall);
-        }
-
-        // PAss in the ball for IA
+        
         public void HandleKeys(Microsoft.Xna.Framework.Input.KeyboardState keyboard)
         {
-            if (!isIA)
-            {
-                Sprite.HandleKeys(keyboard, kb);
-            }
-            else // simple IA for now
+            if (IsNPC)
             {
                 Sprite.HandleIA();
             }
+            else // simple IA for now
+            {
+                Sprite.HandleKeys(keyboard, kb);
+            }
+        }
+        
+        public void Update(GameTime gameTime)
+        {
+            foreach (Wall wall in walls) wall.Update(gameTime);
+            Sprite.Update(gameTime);
         }
 
-        public void SetOpponent(Player player)
+        public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            Sprite.Opponent = player.Sprite;
+            foreach (Wall wall in walls) wall.Draw(gameTime, spriteBatch);
+            Sprite.Draw(gameTime, spriteBatch);
         }
     }
 }

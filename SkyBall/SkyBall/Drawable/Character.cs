@@ -18,118 +18,105 @@ namespace SkyBall.Drawable
 {
     public class Character : DrawableGameObject
     {
-        public enum PlayerPosition { Top, Bottom }
+        private float maxSpeed = 4f;
+        private float maxAccel = 0.8f;
 
-        private Vector2 INITIAL_MAX_SPEED = new Vector2(4f);
-        private Vector2 INITIAL_ACCEL_SPEED = new Vector2(0.8f);
-        private const int INITIAL_STRENGTH_GAINER = 1;
-        private float strengthGainer;
-        private const float LIFT_STEP = 0.1f;
-        public float MAX_LIFT = 3f;
-        public int MAX_STRENGTH = 150;
-        private const int MAX_AREA_HEIGHT = 175;
-        private Emitter powerEmitter, runEmitter, sparkEmitter;
-        public float Strength{get;set;}
+        public float Strength { get; set; }
+        private float minStrengthStep = 1f;
+        private float currentStrength;
+        private float maxStrength = 150f;
+
         public float Lift { get; set; }
-        private bool isHitting, hasHit, isRunning, isAiming = true;
-        private PlayerPosition playerPosition;
-        private string powerTex;
-        private Texture2D textureShadow;
-        private bool isKeysReversed;
-        public Power CurrentPower{get;set;}
-        public bool IA { get; set; }
-        public Character Opponent { get; set; }
+        private float liftStep = 0.1f;
+        private float maxLift = 3f;
 
-        public PlayerPosition ScreenPosition {get;set;}
+        private const int MAX_AREA_HEIGHT = 175;
 
-        public Character(Game game, string id) : base(game, id) { }
+        private Texture2D shadow;
+        private Emitter powerEmitter, runEmitter, sparkEmitter;
+        public Power CurrentPower { get; set; }
+        private bool isHitting, hasHit, isRunning, isAiming, isKeysReversed;
+        public Player Player { get; set; }
 
-        public Character(Game game, string id, PlayerPosition playerPosition, string powerTex) : base(game, id)
+        public Character(Player player, Texture2D texture) : 
+            base(null, texture, true, new SpriteSheetLoader(player.Placement == Player.Side.Up ? "facedown" : "faceup", "idle"))
         {
-            this.playerPosition = playerPosition;
-            this.powerTex = powerTex;
-            strengthGainer = INITIAL_STRENGTH_GAINER;
+            Player = player;
+            currentStrength = minStrengthStep;
             CurrentPower = Power.None;
-        }
-
-        public override void Initialize()
-        {
-            base.Initialize();
-            InitParticleEmitters();
-            animated = true;
-            spriteSheetLoader = new SpriteSheetLoader(ScreenPosition == PlayerPosition.Top ? "facedown" : "faceup");
             spriteSheetLoader.OnAnimComplete += new EventHandler(spriteSheet_OnAnimComplete);
-            setAnimation("idle");
+            SetPosition();
             canMove = true;
-            MaxSpeed = INITIAL_MAX_SPEED;
-            MaxAcceleration = INITIAL_ACCEL_SPEED;
-            forces.Add(Force.GroundFriction); // friction
-            OnReady += new EventHandler(Character_OnReady);
+            MaxSpeed = maxSpeed;
+            MaxAcceleration = maxAccel;
+            forces.Add(Force.GroundFriction);
+            InitParticleEmitters();
+            shadow = TextureFactory.getFactory().Get("shadow");
         }
 
         private void InitParticleEmitters()
         {
-            powerEmitter = new Emitter();
-            powerEmitter.Active = false;
-            powerEmitter.TextureList.Add(Game.Content.Load<Texture2D>(powerTex));
-            powerEmitter.RandomEmissionInterval = new RandomMinMax(100);
-            powerEmitter.ParticleLifeTime = 1000;
-            powerEmitter.ParticleDirection = new RandomMinMax(60);
-            powerEmitter.ParticleSpeed = new RandomMinMax(0.1);
-            powerEmitter.ParticleRotation = new RandomMinMax(360);
-            powerEmitter.RotationSpeed = new RandomMinMax(0.08);
-            powerEmitter.ParticleFader = new ParticleFader(true, true, 20);
-            powerEmitter.ParticleScaler = new ParticleScaler(0.3f, 30f, 0, 5000);
-            powerEmitter.Position = Center;
-            ParticleFactory.getFactory().Add("power-" + ScreenPosition.ToString(), powerEmitter);
-
-            runEmitter = new Emitter();
-            runEmitter.Active = true;
-            runEmitter.TextureList.Add(Game.Content.Load<Texture2D>("images/ray"));
-            runEmitter.RandomEmissionInterval = new RandomMinMax(15);
-            runEmitter.ParticleLifeTime = 500;
-            runEmitter.ParticleDirection = new RandomMinMax(0);
-            runEmitter.ParticleSpeed = new RandomMinMax(0);
-            runEmitter.ParticleRotation = new RandomMinMax(0);
-            runEmitter.RotationSpeed = new RandomMinMax(0);
-            runEmitter.ParticleFader = new ParticleFader(true, true, 100);
-            runEmitter.ParticleScaler = new ParticleScaler(0.1f, 0.1f, 0, 10);
-            runEmitter.Position = Center;
-            ParticleFactory.getFactory().Add("run-" + ScreenPosition.ToString(), runEmitter);
-
-            sparkEmitter = new Emitter();
-            sparkEmitter.Active = false;
-            sparkEmitter.TextureList.Add(Game.Content.Load<Texture2D>("images/dots"));
-            sparkEmitter.RandomEmissionInterval = new RandomMinMax(200);
-            sparkEmitter.ParticleLifeTime = 1500;
-            sparkEmitter.ParticleDirection = new RandomMinMax(0.2);
-            sparkEmitter.ParticleSpeed = new RandomMinMax(0.6);
-            sparkEmitter.ParticleRotation = new RandomMinMax(60);
-            sparkEmitter.RotationSpeed = new RandomMinMax(0.04);
-            sparkEmitter.ParticleFader = new ParticleFader(false, true, 300);
-            sparkEmitter.ParticleScaler = new ParticleScaler(1f,2.5f, 0, 10);
-            sparkEmitter.Position = Center;
-            ParticleFactory.getFactory().Add("shine-" + ScreenPosition.ToString(), sparkEmitter);
-
-        }
-
-        public override void LoadGraphics(SpriteBatch spriteBatch)
-        {
-            base.LoadGraphics(spriteBatch);
-            textureShadow = Game.Content.Load<Texture2D>("images/shadow");
-        }
-
-        void Character_OnReady(object sender, EventArgs e)
-        {
-            if (ScreenPosition == PlayerPosition.Top)
+            powerEmitter = new Emitter
             {
-                Position = new Vector2(screenWidth / 2, Height);
-                Bounds = new Rectangle(15, 0, screenWidth - Width , MAX_AREA_HEIGHT);
+                Active = false,
+                RandomEmissionInterval = new RandomMinMax(100),
+                ParticleLifeTime = 1000,
+                ParticleDirection = new RandomMinMax(60),
+                ParticleSpeed = new RandomMinMax(0.1),
+                ParticleRotation = new RandomMinMax(360),
+                RotationSpeed = new RandomMinMax(0.08),
+                ParticleFader = new ParticleFader(true, true, 20),
+                ParticleScaler = new ParticleScaler(0.3f, 30f, 0, 5000),
+                Position = Center
+            };
+            powerEmitter.TextureList.Add(TextureFactory.getFactory().Get("spark"));
+            ParticleFactory.getFactory().Add(powerEmitter);
+
+            runEmitter = new Emitter
+            {
+                Active = true,
+                RandomEmissionInterval = new RandomMinMax(15),
+                ParticleLifeTime = 500,
+                ParticleDirection = new RandomMinMax(0),
+                ParticleSpeed = new RandomMinMax(0),
+                ParticleRotation = new RandomMinMax(0),
+                RotationSpeed = new RandomMinMax(0),
+                ParticleFader = new ParticleFader(true, true, 100),
+                ParticleScaler = new ParticleScaler(0.1f, 0.1f, 0, 10),
+                Position = Center
+            };
+            runEmitter.TextureList.Add(TextureFactory.getFactory().Get("ray"));
+            ParticleFactory.getFactory().Add(runEmitter);
+
+            sparkEmitter = new Emitter
+            {
+                Active = false,
+                RandomEmissionInterval = new RandomMinMax(200),
+                ParticleLifeTime = 1500,
+                ParticleDirection = new RandomMinMax(0.2),
+                ParticleSpeed = new RandomMinMax(0.6),
+                ParticleRotation = new RandomMinMax(60),
+                RotationSpeed = new RandomMinMax(0.04),
+                ParticleFader = new ParticleFader(false, true, 300),
+                ParticleScaler = new ParticleScaler(1f, 2.5f, 0, 10),
+                Position = Center
+            };
+            sparkEmitter.TextureList.Add(TextureFactory.getFactory().Get("dots"));
+            ParticleFactory.getFactory().Add(sparkEmitter);
+
+        }
+
+        private void SetPosition()
+        {
+            if (Player.Placement == Player.Side.Up)
+            {
+                PlaceCenterAt(GameConfig.WIDTH / 2, Height);
+                Bounds = new Rectangle(15, 0, GameConfig.WIDTH - Width , MAX_AREA_HEIGHT);
             }
             else
             {
-                Position = new Vector2(screenWidth / 2, screenHeight - 2 * Height);
-                Bounds = new Rectangle(Engine.WIN_BORDER * 2, screenHeight - MAX_AREA_HEIGHT, screenWidth - Width - Engine.WIN_BORDER * 2, MAX_AREA_HEIGHT);
+                PlaceCenterAt(GameConfig.WIDTH / 2, GameConfig.HEIGHT - 2 * Height);
+                Bounds = new Rectangle(GameConfig.WIN_BORDER * 2, GameConfig.HEIGHT - MAX_AREA_HEIGHT, GameConfig.WIDTH - Width - GameConfig.WIN_BORDER * 2, MAX_AREA_HEIGHT);
             } 
         }
 
@@ -144,30 +131,30 @@ namespace SkyBall.Drawable
                 Speed = Vector2.Zero;
                 canMove = true;
                 isAiming = false;
-                if (IA)
+                if (Player.IsNPC)
                 {
-                    setAnimation("idle");
+                    SetAnimation("idle");
                 }
             }
         }
 
         public void Aim()
         {
-            if (IA)
+            if (Player.IsNPC)
             {
-                Strength += strengthGainer / 2f;
-                Lift += (Opponent.Center.X < screenWidth / 2 ? LIFT_STEP : -LIFT_STEP);
+                Strength += currentStrength / 2f;
+                Lift += (Player.Opponent.Sprite.Center.X < GameConfig.WIDTH / 2 ? liftStep : -liftStep);
             }
             else
             {
-                Strength += strengthGainer;
+                Strength += currentStrength;
             }
-            powerEmitter.RandomEmissionInterval = new RandomMinMax(MAX_STRENGTH + 10 - Strength);
+            powerEmitter.RandomEmissionInterval = new RandomMinMax(maxStrength + 10 - Strength);
             powerEmitter.ParticleScaler = new ParticleScaler(0.3f, Strength / 5, 0, 5000);
-            if (Strength > MAX_STRENGTH)
+            if (Strength > maxStrength)
             {
-                Strength = MAX_STRENGTH;
-                SoundFactory.getFactory().Play("charge", false);
+                Strength = maxStrength;
+                SoundFactory.getFactory().PlaySound("charge");
             }
             canMove = false;
             isAiming = true;
@@ -180,7 +167,7 @@ namespace SkyBall.Drawable
             {
                 isHitting = true;
                 hasHit = false;
-                setAnimation(currentAnimation == "prepare_hitleft" ? "hit_left" : "hit_right");
+                SetAnimation(currentAnimation == "prepare_hitleft" ? "hit_left" : "hit_right");
                 powerEmitter.Active = false;
                 SoundFactory.getFactory().Stop("charge");
             }
@@ -191,7 +178,7 @@ namespace SkyBall.Drawable
             base.Update(gameTime);
             Ball ball = (Ball)ComponentFactory.getFactory().Get("ball");
 
-            if (IA)
+            if (Player.IsNPC)
             {
                 if (ball.Rect.Intersects(Rect))
                 {
@@ -208,8 +195,8 @@ namespace SkyBall.Drawable
                     isKeysReversed = false;
                     forces.Clear();
                     forces.Add(Force.GroundFriction);
-                    MaxSpeed = INITIAL_MAX_SPEED;
-                    strengthGainer = INITIAL_STRENGTH_GAINER;
+                    MaxSpeed = maxSpeed;
+                    currentStrength = minStrengthStep;
                     ball.IsCrazy = false;
                     sparkEmitter.Active = false;
                 }
@@ -228,14 +215,14 @@ namespace SkyBall.Drawable
                             sparkEmitter.ModColor = Color.Orange;
                             break;
                         case Power.PowerType.Speed:
-                            MaxSpeed = INITIAL_MAX_SPEED * 2;
-                            MaxAcceleration = INITIAL_ACCEL_SPEED * 2;
+                            MaxSpeed = maxSpeed * 2;
+                            MaxAcceleration = maxAccel * 2;
                             forces.Clear();
                             forces.Add(Force.HighSpeedFriction);
                             sparkEmitter.ModColor = Color.DarkGray;
                             break;
                         case Power.PowerType.Power:
-                            strengthGainer = INITIAL_STRENGTH_GAINER * 2;
+                            currentStrength = minStrengthStep * 2;
                             sparkEmitter.ModColor = Color.Green;
                             break;
                         case Power.PowerType.Bend:
@@ -267,15 +254,15 @@ namespace SkyBall.Drawable
                     ball.Speed = GetAimDirection(ball);
                     if (ball.Speed.LengthSquared() < Ball.FIRE_SPEED)
                     {
-                        SoundFactory.getFactory().Play("shot1", true);
+                        SoundFactory.getFactory().PlaySound("shot1");
                     }
                     else if (ball.Speed.LengthSquared() > Ball.FIRE_SPEED && ball.Speed.LengthSquared() < Ball.PLASMA_SPEED)
                     {
-                        SoundFactory.getFactory().Play("shot2", true);
+                        SoundFactory.getFactory().PlaySound("shot2");
                     }
                     else
                     {
-                        SoundFactory.getFactory().Play("shot3", true);
+                        SoundFactory.getFactory().PlaySound("shot3");
                     }
                 }
             }
@@ -283,7 +270,7 @@ namespace SkyBall.Drawable
 
         private Vector2 GetAimDirection(Ball ball)
         {
-            int dir = ScreenPosition == Character.PlayerPosition.Top ? 1 : -1;
+            int dir = Player.Placement == Player.Side.Up ? 1 : -1;
             float speedX, speedY;
             speedY = dir * (Math.Abs(ball.Speed.Y) * 2f / 3 + Strength / 10);
             if (speedY <= 0 && speedY > -Ball.MIN_SPEED)
@@ -294,22 +281,22 @@ namespace SkyBall.Drawable
             {
                 speedY = Ball.MIN_SPEED;
             }
-            speedX = MathHelper.Clamp(Lift, -MAX_LIFT, MAX_LIFT);
+            speedX = MathHelper.Clamp(Lift, -maxLift, maxLift);
             return new Vector2(speedX, speedY);
         }
 
-        public override void Draw(GameTime gameTime)
+        public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            if (CurrentPower.type == Power.PowerType.RevealAim && isAiming)
-            {
-                Primitives2d prim = new Primitives2d(Game.GraphicsDevice, SpriteBatch);
-                Ball ball = (Ball)ComponentFactory.getFactory().Get("ball");
-                Vector2 Direction = GetAimDirection(ball);
-                prim.DrawLine((int)Center.X, (int)Center.Y, (int)(Center.X + Direction.X * 300), (int) (Center.Y + Direction.Y * 300), new Color(1f, 0, 0, 0.2f));
-            }
+            //if (CurrentPower.type == Power.PowerType.RevealAim && isAiming)
+            //{
+            //    Primitives2d prim = new Primitives2d(Game.GraphicsDevice, spriteBatch);
+            //    Ball ball = (Ball)ComponentFactory.getFactory().Get("ball");
+            //    Vector2 Direction = GetAimDirection(ball);
+            //    prim.DrawLine((int)Center.X, (int)Center.Y, (int)(Center.X + Direction.X * 300), (int) (Center.Y + Direction.Y * 300), new Color(1f, 0, 0, 0.2f));
+            //}
             Vector2 shadowPosition = new Vector2(Position.X - Width/2, Position.Y + 24);
-            base.Draw(gameTime);
-            SpriteBatch.Draw(textureShadow, shadowPosition, null, Color.White, 0, Vector2.Zero, new Vector2((float)2 * Width / textureShadow.Width, 0.8f), SpriteEffects.None, 0.9f);
+            base.Draw(gameTime, spriteBatch);
+            spriteBatch.Draw(shadow, shadowPosition, null, Color.White, 0, Vector2.Zero, new Vector2((float)2 * Width / shadow.Width, 0.8f), SpriteEffects.None, 0.9f);
 
         }
 
@@ -322,58 +309,58 @@ namespace SkyBall.Drawable
             {
                 if (keyboard.IsKeyDown(k.KeyUp) && !keyboard.IsKeyDown(k.KeyRight) && !keyboard.IsKeyDown(k.KeyDown) && !keyboard.IsKeyDown(k.KeyLeft) && !keyboard.IsKeyDown(k.KeyAction) && currentAnimation != "run_up")
                 {
-                    setAnimation("run_up");
+                    SetAnimation("run_up");
                 }
                 else if (keyboard.IsKeyDown(k.KeyUp) && keyboard.IsKeyDown(k.KeyRight) && !keyboard.IsKeyDown(k.KeyDown) && !keyboard.IsKeyDown(k.KeyLeft) && !keyboard.IsKeyDown(k.KeyAction) && currentAnimation != "run_upright")
                 {
-                    setAnimation("run_upright");
+                    SetAnimation("run_upright");
                 }
                 else if (!keyboard.IsKeyDown(k.KeyUp) && keyboard.IsKeyDown(k.KeyRight) && !keyboard.IsKeyDown(k.KeyDown) && !keyboard.IsKeyDown(k.KeyLeft) && !keyboard.IsKeyDown(k.KeyAction) && currentAnimation != "run_right")
                 {
-                    setAnimation("run_right");
+                    SetAnimation("run_right");
                 }
                 else if (!keyboard.IsKeyDown(k.KeyUp) && keyboard.IsKeyDown(k.KeyRight) && keyboard.IsKeyDown(k.KeyDown) && !keyboard.IsKeyDown(k.KeyLeft) && !keyboard.IsKeyDown(k.KeyAction) && currentAnimation != "run_downright")
                 {
-                    setAnimation("run_downright");
+                    SetAnimation("run_downright");
                 }
                 else if (!keyboard.IsKeyDown(k.KeyUp) && !keyboard.IsKeyDown(k.KeyRight) && keyboard.IsKeyDown(k.KeyDown) && !keyboard.IsKeyDown(k.KeyLeft) && !keyboard.IsKeyDown(k.KeyAction) && currentAnimation != "run_down")
                 {
-                    setAnimation("run_down");
+                    SetAnimation("run_down");
                 }
                 else if (!keyboard.IsKeyDown(k.KeyUp) && !keyboard.IsKeyDown(k.KeyRight) && keyboard.IsKeyDown(k.KeyDown) && keyboard.IsKeyDown(k.KeyLeft) && !keyboard.IsKeyDown(k.KeyAction) && currentAnimation != "run_downleft")
                 {
-                    setAnimation("run_downleft");
+                    SetAnimation("run_downleft");
                 }
                 else if (!keyboard.IsKeyDown(k.KeyUp) && !keyboard.IsKeyDown(k.KeyRight) && !keyboard.IsKeyDown(k.KeyDown) && keyboard.IsKeyDown(k.KeyLeft) && !keyboard.IsKeyDown(k.KeyAction) && currentAnimation != "run_left")
                 {
-                    setAnimation("run_left");
+                    SetAnimation("run_left");
                 }
                 else if (keyboard.IsKeyDown(k.KeyUp) && !keyboard.IsKeyDown(k.KeyRight) && !keyboard.IsKeyDown(k.KeyDown) && keyboard.IsKeyDown(k.KeyLeft) && !keyboard.IsKeyDown(k.KeyAction) && currentAnimation != "run_upleft")
                 {
-                    setAnimation("run_upleft");
+                    SetAnimation("run_upleft");
                 }
                 else if (!keyboard.IsKeyDown(k.KeyUp) && !keyboard.IsKeyDown(k.KeyRight) && !keyboard.IsKeyDown(k.KeyDown) && !keyboard.IsKeyDown(k.KeyLeft) && !keyboard.IsKeyDown(k.KeyAction) && currentAnimation != "idle")
                 {
-                    setAnimation("idle");
+                    SetAnimation("idle");
                 }
 
                 if (canMove)
                 {
                     if (keyboard.IsKeyDown(k.KeyLeft))
                     {
-                        Speed += new Vector2(-MaxAcceleration.X, 0);
+                        Speed += new Vector2(-MaxAcceleration, 0);
                     }
                     if (keyboard.IsKeyDown(k.KeyRight))
                     {
-                        Speed += new Vector2(MaxAcceleration.X, 0);
+                        Speed += new Vector2(MaxAcceleration, 0);
                     }
                     if (keyboard.IsKeyDown(k.KeyUp))
                     {
-                        Speed += new Vector2(0, -MaxAcceleration.Y);
+                        Speed += new Vector2(0, -MaxAcceleration);
                     }
                     if (keyboard.IsKeyDown(k.KeyDown))
                     {
-                        Speed += new Vector2(0, MaxAcceleration.Y);
+                        Speed += new Vector2(0, MaxAcceleration);
                     }
                 }
                 
@@ -384,20 +371,20 @@ namespace SkyBall.Drawable
                     {
                         if (keyboard.IsKeyDown(k.KeyLeft))
                         {
-                            setAnimation("prepare_hitleft");
+                            SetAnimation("prepare_hitleft");
                         }
                         else
                         {
-                            setAnimation("prepare_hitright");
+                            SetAnimation("prepare_hitright");
                         }
                     }
 
                     if (keyboard.IsKeyDown(k.KeyLeft))
                     {
-                        Lift = MathHelper.Clamp(Lift - LIFT_STEP, -MAX_LIFT, MAX_LIFT);
+                        Lift = MathHelper.Clamp(Lift - liftStep, -maxLift, maxLift);
                     } else if (keyboard.IsKeyDown(k.KeyRight))
                     {
-                        Lift = MathHelper.Clamp(Lift + LIFT_STEP, -MAX_LIFT, MAX_LIFT);
+                        Lift = MathHelper.Clamp(Lift + liftStep, -maxLift, maxLift);
                     }
                 }
                 else if (keyboard.IsKeyUp(k.KeyAction))
@@ -410,15 +397,15 @@ namespace SkyBall.Drawable
         internal void HandleIA()
         {
             Ball ball = (Ball)ComponentFactory.getFactory().Get("ball");
-            if ((ball.Speed.Y < 0 && playerPosition == Character.PlayerPosition.Bottom) ||
-                (ball.Speed.Y > 0 && playerPosition == Character.PlayerPosition.Top))
+            if ((ball.Speed.Y < 0 && Player.Placement == Entity.Player.Side.Down) ||
+                (ball.Speed.Y > 0 && Player.Placement == Entity.Player.Side.Up))
             {
                 // the ball is leaving, go back to middle
                 Rectangle safeZone = new Rectangle(Bounds.Width / 2 - 40, Bounds.Y, 80, Bounds.Height);
                 if (!Rect.Intersects(safeZone))
                 {
                     int dir = Rect.X < safeZone.X ? 1 : -1;
-                    Speed += new Vector2(dir * MaxAcceleration.X, 0);
+                    Speed += new Vector2(dir * MaxAcceleration, 0);
                 }
 
             }
@@ -430,23 +417,23 @@ namespace SkyBall.Drawable
                 float ballXPosHorizPlane = ball.Position.X + distXMadeByBall;
                 float hitMinX = ballXPosHorizPlane - 10;
                 float hitMaxX = ballXPosHorizPlane + 10;
-                if ((Position.X < hitMinX || Position.X > hitMaxX) && Position.X + Speed.X < screenWidth - 40)
+                if ((Position.X < hitMinX || Position.X > hitMaxX) && Position.X + Speed.X < GameConfig.WIDTH - 40)
                 {
                     int dir = Position.X < hitMinX ? 1 : -1;
-                    Speed += new Vector2(dir * MaxAcceleration.X, 0);
+                    Speed += new Vector2(dir * MaxAcceleration, 0);
                 }
                 else
                 {
-                    if(ballXPosHorizPlane > 0 && ballXPosHorizPlane < screenWidth) Aim();
+                    if (ballXPosHorizPlane > 0 && ballXPosHorizPlane < GameConfig.WIDTH) Aim();
                     if (currentAnimation != "prepare_hitleft" && currentAnimation != "prepare_hitright")
                     {
                         if (ball.Position.X < Position.X)
                         {
-                            setAnimation("prepare_hitleft");
+                            SetAnimation("prepare_hitleft");
                         }
                         else
                         {
-                            setAnimation("prepare_hitright");
+                            SetAnimation("prepare_hitright");
                         }
                     }
                 }

@@ -7,16 +7,17 @@ using Microsoft.Xna.Framework.Graphics;
 using SkyBall.Physics;
 using SkyBall.SpriteSheet;
 using SkyBall.Core;
+using SkyBall.Config;
 
 namespace SkyBall.Drawable
 {
-    public class DrawableGameObject: DrawableGameComponent
+    public class DrawableGameObject
     {
         public event EventHandler OnOutOfBounds;
-        public event EventHandler OnReady;
-        public SpriteBatch SpriteBatch { get; protected set; }
+
         protected Texture2D texture;
         public Vector2 InitialPosition { get; set; }
+        public string Id { get; private set; }
         public Vector2 Position
         {
             get
@@ -33,9 +34,9 @@ namespace SkyBall.Drawable
             get { return new Vector2(Rect.Center.X, Rect.Center.Y); }
         }
         public Vector2 Speed { get; set; }
-        protected Vector2 MaxSpeed { get; set; }
+        protected float MaxSpeed { get; set; }
         public Vector2 Acceleration { get; set; }
-        protected Vector2 MaxAcceleration { get; set; }
+        protected float MaxAcceleration { get; set; }
         public Vector2 Scaling { get; set; }
         public float Rotation { get; set; }
         public Color ModColor { get; set; }
@@ -46,46 +47,49 @@ namespace SkyBall.Drawable
         protected bool canMove;
         public Rectangle Bounds { get; set; }
         protected bool BounceOffBounds { get; set; }
-        protected Random rnd = new Random();
-        protected int screenWidth;
-        protected int screenHeight;
-        protected int width, height;
-        public bool Visible { get; set; }
-        protected string texKey, id;
+        private int width, height;
+        public bool IsVisible { get; set; }
 
         // animation
-        protected bool animated = false;
+        public bool IsAnimated {get; set;}
         protected SpriteSheetLoader spriteSheetLoader;
         protected string currentAnimation;
 
-        public DrawableGameObject(Game game, string key) : base(game)
+        public DrawableGameObject(string id, Texture2D texture, bool isAnimated = false, SpriteSheetLoader spriteSheetLoader = null)
         {
-            this.texKey = key.Split('-')[0];
-            this.id = key;
-            ComponentFactory.getFactory().Add(key, this);
-            Visible = true;
-        }
-
-        public override void Initialize()
-        {
-            screenWidth = Game.GraphicsDevice.PresentationParameters.BackBufferWidth;
-            screenHeight = Game.GraphicsDevice.PresentationParameters.BackBufferHeight;
-            Scaling = new Vector2(1f, 1f);
+            Id = id;
+            this.texture = texture;
+            ComponentFactory.getFactory().Add(id, this);
+            IsVisible = true;
+            IsAnimated = isAnimated;
+            Scaling = new Vector2(1f);
             ModColor = Color.White;
+            if (IsAnimated)
+            {
+                this.spriteSheetLoader = spriteSheetLoader;
+            }
+            SetTexture(texture);
         }
 
-        public virtual void LoadGraphics(SpriteBatch spriteBatch)
+        private void SetTexture(Texture2D texture)
         {
-            this.SpriteBatch = spriteBatch;
-            SetTexture("images/" + texKey);
-            base.LoadContent();
-            if (OnReady != null) OnReady(this, null);
+            this.texture = texture;
+            if (IsAnimated)
+            {
+                width = spriteSheetLoader.GetCurrentAnimationFrame().rect.Width;
+                height = spriteSheetLoader.GetCurrentAnimationFrame().rect.Height;
+            }
+            else
+            {
+                width = texture.Width;
+                height = texture.Height;
+            }
         }
 
-        public override void Update(GameTime gameTime)
+        public virtual void Update(GameTime gameTime)
         {
             // update animation frame
-            if (animated && spriteSheetLoader != null)
+            if (IsAnimated && spriteSheetLoader != null)
             {
                 Frame frame = spriteSheetLoader.GetNextAnimationFrame();
                 Rect = new Rectangle(Rect.X, Rect.Y, frame.rect.Width, frame.rect.Height);
@@ -99,8 +103,8 @@ namespace SkyBall.Drawable
 
             if (canMove)
             {
-                Speed = new Vector2(MathHelper.Clamp(Speed.X + Acceleration.X, -MaxSpeed.X, MaxSpeed.X),
-                                    MathHelper.Clamp(Speed.Y + Acceleration.Y, -MaxSpeed.Y, MaxSpeed.Y));
+                Speed = new Vector2(MathHelper.Clamp(Speed.X + Acceleration.X, -MaxSpeed, MaxSpeed),
+                                    MathHelper.Clamp(Speed.Y + Acceleration.Y, -MaxSpeed, MaxSpeed));
             }
 
             // bounderies
@@ -146,33 +150,18 @@ namespace SkyBall.Drawable
             }
         }
 
-        public override void Draw(GameTime gameTime)
+        public virtual void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            if (Visible)
+            if (IsVisible)
             {
-                if (animated && spriteSheetLoader != null)
+                if (IsAnimated && spriteSheetLoader != null)
                 {
-                    SpriteBatch.Draw(texture, Position, spriteSheetLoader.GetCurrentAnimationFrame().rect, ModColor, Rotation, Vector2.Zero, Scaling, SpriteEffects.None, 0);
+                    spriteBatch.Draw(texture, Position, spriteSheetLoader.GetCurrentAnimationFrame().rect, ModColor, Rotation, Vector2.Zero, Scaling, SpriteEffects.None, 0);
                 }
                 else
                 {
-                    SpriteBatch.Draw(texture, Position, null, ModColor, Rotation, Vector2.Zero, Scaling, SpriteEffects.None, 0);
+                    spriteBatch.Draw(texture, Position, null, ModColor, Rotation, Vector2.Zero, Scaling, SpriteEffects.None, 0);
                 }
-            }
-        }
-
-        protected void SetTexture(string texName)
-        {
-            texture = Game.Content.Load<Texture2D>(texName);
-            if (animated)
-            {
-                width = spriteSheetLoader.GetCurrentAnimationFrame().rect.Width;
-                height = spriteSheetLoader.GetCurrentAnimationFrame().rect.Height;
-            }
-            else
-            {
-                width = texture.Width;
-                height = texture.Height;
             }
         }
 
@@ -181,9 +170,9 @@ namespace SkyBall.Drawable
             Position = new Vector2(x - Width / 2, y - Height / 2);
         }
 
-        protected void setAnimation(string animationKey)
+        protected void SetAnimation(string animationKey)
         {
-            if (animated && spriteSheetLoader != null)
+            if (IsAnimated && spriteSheetLoader != null)
             {
                 this.currentAnimation = animationKey;
                 spriteSheetLoader.SetCurrentAnimation(animationKey);

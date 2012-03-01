@@ -5,14 +5,16 @@ using System.Text;
 using Microsoft.Xna.Framework;
 using System.IO;
 using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework.Content;
 
 namespace SkyBall.Core
 {
     public class SoundFactory
     {
-        private Game game;
+        private ContentManager content;
         private static SoundFactory factory = null;
         private Dictionary<String, SoundEffect> sounds = new Dictionary<string, SoundEffect>();
+        private Dictionary<String, SoundEffectInstance> instances = new Dictionary<string, SoundEffectInstance>();
 
         private SoundFactory() { }
 
@@ -25,42 +27,46 @@ namespace SkyBall.Core
             return factory;
         }
 
-        public void Initialize(Game game)
+        public void Initialize(ContentManager content)
         {
-            this.game = game;
+            this.content = content;
         }
 
-        public void Add(string soundFilename, bool isLooped)
+        public void AddSound(string key, string filename, bool isLooped = false)
         {
-            if (!sounds.ContainsKey(soundFilename))
+            if (!sounds.ContainsKey(key))
             {
-                SoundEffect sound = game.Content.Load<SoundEffect>("fx/" + soundFilename);
-                sounds.Add(soundFilename, sound);
-                if (isLooped)
+                sounds.Add(key, content.Load<SoundEffect>(filename));
+            }
+        }
+
+        public void PlaySound(string key, bool isSingle = false)
+        {
+            if (sounds.ContainsKey(key))
+            {
+                if (!isSingle)
                 {
-                    SoundEffectInstance instance = sound.CreateInstance();
-                    instance.IsLooped = true;
+                    sounds[key].Play();
+                }
+                else
+                {
+                    if(!instances.ContainsKey(key)){
+                        instances.Add(key, sounds[key].CreateInstance());
+                    }
+
+                    if(instances[key].State != SoundState.Playing){
+                        instances[key].Play();
+                    }
                 }
             }
         }
 
-        public void Play(string sound, bool canOverlap)
+        public void Stop(string key)
         {
-            SoundEffect fx = null;
-            sounds.TryGetValue(sound, out fx);
-            SoundEffectInstance si = fx.CreateInstance();
-            if (canOverlap || (si.State != SoundState.Playing && !canOverlap))
+            if (instances.ContainsKey(key))
             {
-                fx.Play();
+                instances[key].Stop();
             }
-        }
-
-        public void Stop(string sound)
-        {
-            SoundEffect fx = null;
-            sounds.TryGetValue(sound, out fx);
-            SoundEffectInstance si = fx.CreateInstance();
-            si.Stop();
         }
     }
 }

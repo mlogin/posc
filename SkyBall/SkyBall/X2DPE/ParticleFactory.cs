@@ -10,9 +10,9 @@ namespace SkyBall.X2DPE
 {
     public class ParticleFactory
     {
-        private Game game;
         private static ParticleFactory factory = null;
         private Dictionary<String, Emitter> emitters = new Dictionary<string, Emitter>();
+        private static int idCounter = 0;
 
         private ParticleFactory() { }
 
@@ -25,24 +25,23 @@ namespace SkyBall.X2DPE
             return factory;
         }
 
-        public void Initialize(Game game)
+        public void Add(string key, Emitter emitter)
         {
-            this.game = game;
+            string id = key == null ? NewId() : key;
+            if (!emitters.ContainsKey(id))
+            {
+                emitters.Add(id, emitter);
+            }
         }
 
-        public void Add(string key, Emitter component)
+        public void Add(Emitter emitter)
         {
-            if (key != null)
-            {
-                emitters.Add(key, component);
-            }
+            Add(null, emitter);
         }
 
         public Emitter Get(string key)
         {
-            Emitter value = null;
-            emitters.TryGetValue(key, out value);
-            return value;
+            return emitters.ContainsKey(key) ? emitters[key] : null;
         }
 
         public void Update(GameTime gameTime)
@@ -60,6 +59,12 @@ namespace SkyBall.X2DPE
             {
                 emitter.DrawParticles(gameTime, spriteBatch);
             }
+        }
+
+        private string NewId()
+        {
+            idCounter++;
+            return "emi-" + idCounter.ToString();
         }
     }
 }

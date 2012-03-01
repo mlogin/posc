@@ -22,9 +22,10 @@ namespace SkyBall.SpriteSheet
         private int currentCount;
         public event EventHandler OnAnimComplete;
 
-        public SpriteSheetLoader(string xmlDescriptor)
+        public SpriteSheetLoader(string xmlDescriptor, string initialState)
         {
             LoadFromXmlStream(xmlDescriptor + ".xml");
+            SetCurrentAnimation(initialState);
         }
 
         public Frame GetCurrentAnimationFrame()

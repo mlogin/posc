@@ -17,9 +17,9 @@ namespace SkyBall.Entity
 
         public bool Displayed { get; set; }
         public Power.PowerType PowerUpType { get; set; }
-        private Rectangle SpriteRegion { get; set; }    
-
-        public PowerUp(Game game, string id) : base(game, id) {
+        private Rectangle SpriteRegion { get; set; }
+        private Random rnd = new Random();
+        public PowerUp(string id) : base(id,  TextureFactory.getFactory().Get("powerups"), false) {
         }
 
         public void ReInitialize()
@@ -106,11 +106,11 @@ namespace SkyBall.Entity
             }
         }
 
-        public override void Draw(GameTime gameTime)
+        public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
             if (Displayed)
             {
-                SpriteBatch.Draw(texture, Position, SpriteRegion, ModColor, Rotation, Vector2.Zero, Scaling, SpriteEffects.None, 0);
+                spriteBatch.Draw(texture, Position, SpriteRegion, ModColor, Rotation, Vector2.Zero, Scaling, SpriteEffects.None, 0);
             }
         }
 

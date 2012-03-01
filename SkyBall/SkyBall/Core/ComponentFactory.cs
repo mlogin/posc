@@ -9,9 +9,9 @@ namespace SkyBall.Core
 {
     public class ComponentFactory
     {
-        private Game game;
         private static ComponentFactory factory = null;
         private Dictionary<String, Object> components = new Dictionary<string, Object>();
+        private static int idCounter = 0;
 
         private ComponentFactory() { }
 
@@ -24,34 +24,24 @@ namespace SkyBall.Core
             return factory;
         }
 
-        public void Initialize(Game game)
-        {
-            this.game = game;
-        }
-
         public void Add(string key, Object component)
         {
-            if (key != null)
+            string id = key == null ? NewId() : key; 
+            if (!components.ContainsKey(id))
             {
-                components.Add(key, component);
-                if (component is IGameComponent)
-                {
-                    game.Components.Add((IGameComponent)component);
-                }
+                components.Add(id, component);
             }
         }
 
         public Object Get(string key)
         {
-            Object value = null;
-            components.TryGetValue(key, out value);
-            return value;
+            return components.ContainsKey(key) ? components[key] : null;
         }
 
-
-        internal string NewId()
+        private string NewId()
         {
-            return Path.GetRandomFileName().Replace(".", "");
+            idCounter++;
+            return "cmp-" + idCounter.ToString();
         }
     }
 }

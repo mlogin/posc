@@ -7,6 +7,8 @@ using Microsoft.Xna.Framework.Graphics;
 using X2DPE;
 using X2DPE.Helpers;
 using SkyBall.X2DPE;
+using SkyBall.Core;
+using SkyBall.Config;
 //using PongFS.Particles;
 
 namespace SkyBall.Drawable
@@ -20,69 +22,64 @@ namespace SkyBall.Drawable
         private Emitter fireEmitter, plasmaEmitter, smokeEmitter;
         public bool IsCrazy;
 
-        public Ball(Game game, string id) : base(game, id) { }
-
-        public override void Initialize()
-        {
-            base.Initialize();
+        public Ball(string id) : base(id, TextureFactory.getFactory().Get("ball")) {
             InitParticleEmitters();
-            Speed = new Vector2(- 1, START_SPEED);
-            OnReady += new EventHandler(Ball_OnReady);
+            Speed = new Vector2(-1, START_SPEED);
+            PlaceCenterAt(GameConfig.WIDTH / 2, GameConfig.HEIGHT / 2);
+            Bounds = new Rectangle(GameConfig.WIN_BORDER, 0, GameConfig.WIDTH - Width - GameConfig.WIN_BORDER, GameConfig.HEIGHT);
+            BounceOffBounds = true; // for now
+            OnOutOfBounds += new EventHandler(Ball_OnOutOfBounds);
         }
 
         private void InitParticleEmitters()
         {
-            fireEmitter = new Emitter();
-            fireEmitter.Active = false;
-            fireEmitter.TextureList.Add(Game.Content.Load<Texture2D>("images/fire"));
-            fireEmitter.RandomEmissionInterval = new RandomMinMax(10);
-            fireEmitter.ParticleLifeTime = 1000;
-            fireEmitter.ParticleDirection = new RandomMinMax(0);
-            fireEmitter.ParticleSpeed = new RandomMinMax(0);
-            fireEmitter.ParticleRotation = new RandomMinMax(360);
-            fireEmitter.RotationSpeed = new RandomMinMax(0);
-            fireEmitter.ParticleFader = new ParticleFader(true, true, 200);
-            fireEmitter.ParticleScaler = new ParticleScaler(0.3f, 0.6f, 0, 500);
-            fireEmitter.Position = new Vector2(140, 580);
-            ParticleFactory.getFactory().Add("fire", fireEmitter);
+            fireEmitter = new Emitter
+            {
+                Active = false,
+                RandomEmissionInterval = new RandomMinMax(10),
+                ParticleLifeTime = 1000,
+                ParticleDirection = new RandomMinMax(0),
+                ParticleSpeed = new RandomMinMax(0),
+                ParticleRotation = new RandomMinMax(360),
+                RotationSpeed = new RandomMinMax(0),
+                ParticleFader = new ParticleFader(true, true, 200),
+                ParticleScaler = new ParticleScaler(0.3f, 0.6f, 0, 500),
+                Position = new Vector2(140, 580)
+            };
+            fireEmitter.TextureList.Add(TextureFactory.getFactory().Get("fire"));
+            ParticleFactory.getFactory().Add(fireEmitter);
 
-            plasmaEmitter = new Emitter();
-            plasmaEmitter.Active = false;
-            plasmaEmitter.TextureList.Add(Game.Content.Load<Texture2D>("images/plasma"));
-            plasmaEmitter.RandomEmissionInterval = new RandomMinMax(5);
-            plasmaEmitter.ParticleLifeTime = 1000;
-            plasmaEmitter.ParticleDirection = new RandomMinMax(0);
-            plasmaEmitter.ParticleSpeed = new RandomMinMax(0.02);
-            plasmaEmitter.ParticleRotation = new RandomMinMax(360);
-            plasmaEmitter.RotationSpeed = new RandomMinMax(0);
-            plasmaEmitter.ParticleFader = new ParticleFader(true, true, 200);
-            plasmaEmitter.ParticleScaler = new ParticleScaler(0.3f, 1f, 0, 500);
-            plasmaEmitter.Position = new Vector2(140, 580);
-            ParticleFactory.getFactory().Add("plasma", plasmaEmitter);
+            plasmaEmitter = new Emitter
+            {
+                Active = false,
+                RandomEmissionInterval = new RandomMinMax(5),
+                ParticleLifeTime = 1000,
+                ParticleDirection = new RandomMinMax(0),
+                ParticleSpeed = new RandomMinMax(0.02),
+                ParticleRotation = new RandomMinMax(360),
+                RotationSpeed = new RandomMinMax(0),
+                ParticleFader = new ParticleFader(true, true, 200),
+                ParticleScaler = new ParticleScaler(0.3f, 1f, 0, 500),
+                Position = new Vector2(140, 580)
+            };
+            plasmaEmitter.TextureList.Add(TextureFactory.getFactory().Get("plasma"));
+            ParticleFactory.getFactory().Add(plasmaEmitter);
 
-            smokeEmitter = new Emitter();
-            smokeEmitter.Active = true;
-            smokeEmitter.TextureList.Add(Game.Content.Load<Texture2D>("images/smoke"));
-            smokeEmitter.RandomEmissionInterval = new RandomMinMax(10);
-            smokeEmitter.ParticleLifeTime = 1200;
-            smokeEmitter.ParticleDirection = new RandomMinMax(0.3);
-            smokeEmitter.ParticleSpeed = new RandomMinMax(0.1);
-            smokeEmitter.ParticleRotation = new RandomMinMax(360);
-            smokeEmitter.RotationSpeed = new RandomMinMax(0);
-            smokeEmitter.ParticleFader = new ParticleFader(false, true, 200);
-            smokeEmitter.ParticleScaler = new ParticleScaler(0.15f, 0.3f, 0, 500);
-            smokeEmitter.Position = new Vector2(140, 580);
-            ParticleFactory.getFactory().Add("smoke", smokeEmitter);
-        }
-
-        void Ball_OnReady(object sender, EventArgs e)
-        {
-            PlaceCenterAt(screenWidth / 2, screenHeight / 2);
-            Bounds = new Rectangle(Engine.WIN_BORDER, 0, screenWidth - Width - Engine.WIN_BORDER, screenHeight);
-            BounceOffBounds = true; // for now
-            OnOutOfBounds += new EventHandler(Ball_OnOutOfBounds);
-
-
+            smokeEmitter = new Emitter
+            {
+                Active = true,
+                RandomEmissionInterval = new RandomMinMax(10),
+                ParticleLifeTime = 1200,
+                ParticleDirection = new RandomMinMax(0.3),
+                ParticleSpeed = new RandomMinMax(0.1),
+                ParticleRotation = new RandomMinMax(360),
+                RotationSpeed = new RandomMinMax(0),
+                ParticleFader = new ParticleFader(false, true, 200),
+                ParticleScaler = new ParticleScaler(0.15f, 0.3f, 0, 500),
+                Position = new Vector2(140, 580)
+            };
+            smokeEmitter.TextureList.Add(TextureFactory.getFactory().Get("smoke"));
+            ParticleFactory.getFactory().Add(smokeEmitter);
         }
 
         void Ball_OnOutOfBounds(object sender, EventArgs e)
