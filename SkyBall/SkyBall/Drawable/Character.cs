@@ -67,6 +67,7 @@ namespace SkyBall.Drawable
                 RotationSpeed = new RandomMinMax(0.08),
                 ParticleFader = new ParticleFader(true, true, 20),
                 ParticleScaler = new ParticleScaler(0.3f, 30f, 0, 5000),
+                ModColor = Player.Placement == Entity.Player.Side.Up ? Color.Green : Color.Red,
                 Position = Center
             };
             powerEmitter.TextureList.Add(TextureFactory.getFactory().Get("spark"));

@@ -66,5 +66,10 @@ namespace SkyBall.X2DPE
             idCounter++;
             return "emi-" + idCounter.ToString();
         }
+
+        internal void RemoveAll()
+        {
+            emitters.Clear();
+        }
     }
 }

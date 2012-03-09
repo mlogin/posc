@@ -25,8 +25,6 @@ namespace SkyBall
         ContentManager content;
         SpriteFont gameFont;
 
-        Random random = new Random();
-
         float pauseAlpha;
 
         public const int WIN_BORDER = 3;
@@ -35,10 +33,10 @@ namespace SkyBall
         private Texture2D background;
         private SpriteFont VideoFont;
         private PowerUp currentPowerUp;
-        private Random rnd = new Random();
         private List<Song> songs = new List<Song>();
         private int currentTrackIndex;
         private const int NB_MUSIC_TRACKS = 5;
+        private FrameRateCounter FrameRateCounter;
 
         /// <summary>
         /// Constructor.
@@ -60,22 +58,38 @@ namespace SkyBall
                 content = new ContentManager(ScreenManager.Game.Services, "Content");
             }
 
+            StartGame();
+        }
+
+        private void StartGame()
+        {
             LoadTextures();
             LoadSounds();
-            
-            player1 = new Player("player1", Player.Side.Up, new KeyboardLayout(KeyboardLayout.Default.Arrows));
-            player2 = new Player("player2", Player.Side.Down);
+            player1 = new Player("player1", Player.Side.Up, GameConfig.UserPref.Player1KeybLayout);
+            if (GameConfig.Multiplayer)
+            {
+                player2 = new Player("player2", Player.Side.Down, GameConfig.UserPref.Player2KeybLayout);
+            }
+            else
+            {
+                player2 = new Player("player2", Player.Side.Down);
+            }
+
             player1.Opponent = player2;
             player2.Opponent = player1;
+            player1.PlayerLost += new EventHandler(player1_PlayerLost);
+            player2.PlayerLost += new EventHandler(player2_PlayerLost);
+            ComponentFactory.getFactory().Add("player 1", player1);
+            ComponentFactory.getFactory().Add("player 2", player2);
             ball = new Ball("ball");
             currentPowerUp = new PowerUp("powerup");
 
-            FrameRateCounter FrameRateCounter = new FrameRateCounter(ScreenManager.Game, "fonts/default");
+            FrameRateCounter = new FrameRateCounter(ScreenManager.Game, "fonts/default");
             ScreenManager.Game.Components.Add(FrameRateCounter);
 
             gameFont = content.Load<SpriteFont>("fonts/default");
 
-            currentTrackIndex = rnd.Next(NB_MUSIC_TRACKS);
+            currentTrackIndex = Tools.Rnd.Next(NB_MUSIC_TRACKS);
             for (int i = 1; i < 6; i++)
             {
                 songs.Add(ScreenManager.Game.Content.Load<Song>("music/0" + i));
@@ -85,6 +99,42 @@ namespace SkyBall
             VideoFont = ScreenManager.Game.Content.Load<SpriteFont>("fonts/default");
 
             ScreenManager.Game.ResetElapsedTime();
+        }
+
+        private void RestartGame()
+        {
+            songs.Clear();
+            ComponentFactory.getFactory().RemoveAll();
+            SoundFactory.getFactory().RemoveAll();
+            TextureFactory.getFactory().RemoveAll();
+            ParticleFactory.getFactory().RemoveAll();
+            FrameRateCounter.Dispose();
+            StartGame();
+        }
+
+        void player2_PlayerLost(object sender, EventArgs e)
+        {
+            ShowEndGame("Player 1 won! Press any key");
+        }
+
+        void player1_PlayerLost(object sender, EventArgs e)
+        {
+            ShowEndGame("Player 2 won! Press any key");
+        }
+
+        private void ShowEndGame(string message)
+        {
+            MediaPlayer.Stop();
+            SoundFactory.getFactory().StopAll();
+            GetInputKeyMsgBoxScreen screen = new GetInputKeyMsgBoxScreen(message);
+            screen.KeyHit += new EventHandler(EndGameInput);
+            ScreenManager.AddScreen(screen, ControllingPlayer);
+        }
+
+        void EndGameInput(object sender, EventArgs e)
+        {
+            LoadingScreen.Load(ScreenManager, false, null, new BackgroundScreen(),
+                                               new MainMenuScreen());
         }
 
         private void LoadSounds()
@@ -114,7 +164,6 @@ namespace SkyBall
             TextureFactory.getFactory().Add("shadow", "images/shadow");
             TextureFactory.getFactory().Add("smoke", "images/smoke");
             TextureFactory.getFactory().Add("spark", "images/spark");
-            TextureFactory.getFactory().Add("spark2", "images/spark2");
             TextureFactory.getFactory().Add("wall", "images/wall");
         }
 
@@ -147,11 +196,12 @@ namespace SkyBall
             if (IsActive)
             {
                 UpdateMusic();
-                rnd.Next();
-                if (!currentPowerUp.Displayed && rnd.Next(PowerUp.SPAWN_RND) == 1)
+                Tools.Rnd.Next();
+                if (!currentPowerUp.Displayed && Tools.Rnd.Next(PowerUp.SPAWN_RND) == 1)
                 {
                     currentPowerUp.ReInitialize();
                 }
+                currentPowerUp.Update(gameTime);
                 ball.Update(gameTime);
                 player1.Update(gameTime);
                 player2.Update(gameTime);
@@ -162,7 +212,7 @@ namespace SkyBall
 
         private void UpdateMusic()
         {
-            if (MediaPlayer.State.Equals(MediaState.Stopped))
+            if (MediaPlayer.State.Equals(MediaState.Stopped) && IsActive)
             {
                 MediaPlayer.Play(songs[currentTrackIndex]);
                 currentTrackIndex = (currentTrackIndex + 1) % (songs.Count - 1);
@@ -222,6 +272,7 @@ namespace SkyBall
 
             ScreenManager.SpriteBatch.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
             ball.Draw(gameTime, ScreenManager.SpriteBatch);
+            currentPowerUp.Draw(gameTime, ScreenManager.SpriteBatch);
             player1.Draw(gameTime, ScreenManager.SpriteBatch);
             player2.Draw(gameTime, ScreenManager.SpriteBatch);
 
@@ -241,6 +292,6 @@ namespace SkyBall
             Rectangle screenRectangle = new Rectangle(0, 0, GameConfig.WIDTH, GameConfig.HEIGHT);
             ScreenManager.SpriteBatch.Draw(background, screenRectangle, null, Color.White, 0, Vector2.Zero, SpriteEffects.None, 1);
         }
-        
+
     }
 }

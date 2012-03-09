@@ -1,4 +1,5 @@
 using Microsoft.Xna.Framework;
+using SkyBall.Config;
 
 
 namespace SkyBall
@@ -10,55 +11,35 @@ namespace SkyBall
     /// </summary>
     class OptionsMenuScreen : MenuScreen
     {
-        MenuEntry ungulateMenuEntry;
-        MenuEntry languageMenuEntry;
-        MenuEntry frobnicateMenuEntry;
-        MenuEntry elfMenuEntry;
-
-        enum Ungulate
-        {
-            BactrianCamel,
-            Dromedary,
-            Llama,
-        }
-
-        static Ungulate currentUngulate = Ungulate.Dromedary;
-
-        static string[] languages = { "C#", "French", "Deoxyribonucleic acid" };
-        static int currentLanguage = 0;
-
-        static bool frobnicate = true;
-
-        static int elf = 23;
+        MenuEntry customizeKeysMenuEntry;
+        MenuEntry musicMenuEntry;
+        MenuEntry soundMenuEntry;
 
         /// <summary>
         /// Constructor.
         /// </summary>
         public OptionsMenuScreen()
-            : base("Options")
+            : base("")
         {
             // Create our menu entries.
-            ungulateMenuEntry = new MenuEntry(string.Empty);
-            languageMenuEntry = new MenuEntry(string.Empty);
-            frobnicateMenuEntry = new MenuEntry(string.Empty);
-            elfMenuEntry = new MenuEntry(string.Empty);
+            customizeKeysMenuEntry = new MenuEntry(string.Empty);
+            musicMenuEntry = new MenuEntry(string.Empty);
+            soundMenuEntry = new MenuEntry(string.Empty);
 
             SetMenuEntryText();
 
             MenuEntry back = new MenuEntry("Back");
 
             // Hook up menu event handlers.
-            ungulateMenuEntry.Selected += UngulateMenuEntrySelected;
-            languageMenuEntry.Selected += LanguageMenuEntrySelected;
-            frobnicateMenuEntry.Selected += FrobnicateMenuEntrySelected;
-            elfMenuEntry.Selected += ElfMenuEntrySelected;
+            customizeKeysMenuEntry.Selected += CustomizeKeysMenuEntrySelected;
+            musicMenuEntry.Selected += MusicMenuEntrySelected;
+            soundMenuEntry.Selected += ElfMenuEntrySelected;
             back.Selected += OnCancel;
             
             // Add entries to the menu.
-            MenuEntries.Add(ungulateMenuEntry);
-            MenuEntries.Add(languageMenuEntry);
-            MenuEntries.Add(frobnicateMenuEntry);
-            MenuEntries.Add(elfMenuEntry);
+            MenuEntries.Add(customizeKeysMenuEntry);
+            MenuEntries.Add(musicMenuEntry);
+            MenuEntries.Add(soundMenuEntry);
             MenuEntries.Add(back);
         }
 
@@ -68,54 +49,26 @@ namespace SkyBall
         /// </summary>
         void SetMenuEntryText()
         {
-            ungulateMenuEntry.Text = "Preferred ungulate: " + currentUngulate;
-            languageMenuEntry.Text = "Language: " + languages[currentLanguage];
-            frobnicateMenuEntry.Text = "Frobnicate: " + (frobnicate ? "on" : "off");
-            elfMenuEntry.Text = "elf: " + elf;
+            customizeKeysMenuEntry.Text = "Customize keys";
+            musicMenuEntry.Text = "Music: " + (GameConfig.UserPref.IsMusicOn ? "on" : "off");
+            soundMenuEntry.Text = "Sound: " + (GameConfig.UserPref.IsSoundFxOn ? "on" : "off");
         }
 
-        /// <summary>
-        /// Event handler for when the Ungulate menu entry is selected.
-        /// </summary>
-        void UngulateMenuEntrySelected(object sender, PlayerIndexEventArgs e)
+        void CustomizeKeysMenuEntrySelected(object sender, PlayerIndexEventArgs e)
         {
-            currentUngulate++;
+            ScreenManager.AddScreen(new CustomizeKeysScreen(), e.PlayerIndex);
+        }
 
-            if (currentUngulate > Ungulate.Llama)
-                currentUngulate = 0;
-
+        void MusicMenuEntrySelected(object sender, PlayerIndexEventArgs e)
+        {
+            GameConfig.UserPref.IsMusicOn = !GameConfig.UserPref.IsMusicOn;
+            //TODO: start or stop music here
             SetMenuEntryText();
         }
 
-
-        /// <summary>
-        /// Event handler for when the Language menu entry is selected.
-        /// </summary>
-        void LanguageMenuEntrySelected(object sender, PlayerIndexEventArgs e)
-        {
-            currentLanguage = (currentLanguage + 1) % languages.Length;
-
-            SetMenuEntryText();
-        }
-
-
-        /// <summary>
-        /// Event handler for when the Frobnicate menu entry is selected.
-        /// </summary>
-        void FrobnicateMenuEntrySelected(object sender, PlayerIndexEventArgs e)
-        {
-            frobnicate = !frobnicate;
-
-            SetMenuEntryText();
-        }
-
-
-        /// <summary>
-        /// Event handler for when the Elf menu entry is selected.
-        /// </summary>
         void ElfMenuEntrySelected(object sender, PlayerIndexEventArgs e)
         {
-            elf++;
+            GameConfig.UserPref.IsSoundFxOn = !GameConfig.UserPref.IsSoundFxOn;
 
             SetMenuEntryText();
         }

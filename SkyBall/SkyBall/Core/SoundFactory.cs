@@ -68,5 +68,19 @@ namespace SkyBall.Core
                 instances[key].Stop();
             }
         }
+
+        public void StopAll()
+        {
+            foreach (SoundEffectInstance sound in instances.Values)
+            {
+                sound.Stop();
+            }
+        }
+
+        internal void RemoveAll()
+        {
+            instances.Clear();
+            sounds.Clear();
+        }
     }
 }

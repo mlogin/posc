@@ -20,6 +20,7 @@ namespace SkyBall.Entity
         public bool IsNPC{get; set;}
         public Side Placement{get; private set;}
         public Player Opponent { get; set; }
+        public event EventHandler PlayerLost;
 
         public Player(string id, Side placement, KeyboardLayout layout = null)
         {
@@ -51,15 +52,25 @@ namespace SkyBall.Entity
                 {
                     position = new Vector2(i * 62 + GameConfig.WIN_BORDER, 0);
                 }
-                CreateNewWallAt(position, false);
+                Wall wall = CreateNewWallAt(position, false);
             }
         }
 
-        private void CreateNewWallAt(Vector2 position, bool isExtra)
+        private Wall CreateNewWallAt(Vector2 position, bool isExtra)
         {
             Wall newWall = new Wall(position);
             newWall.IsBonus = isExtra;
+            if (!isExtra)
+            {
+                newWall.OnDestroyed += new EventHandler(newWall_OnDestroyed);
+            }
             walls.Add(newWall);
+            return newWall;
+        }
+
+        void newWall_OnDestroyed(object sender, EventArgs e)
+        {
+            if (PlayerLost != null) PlayerLost(this, null);
         }
 
         internal void GrantPower(Power power)

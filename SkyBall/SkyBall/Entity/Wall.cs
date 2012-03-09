@@ -20,8 +20,8 @@ namespace SkyBall.Entity
         public int MaxLife { get; private set; }
         public bool IsBonus { get; set; }
         private Color[] colors = new Color[]{
-            Color.DarkGray, Color.DarkRed, Color.Red, Color.OrangeRed, Color.Orange,  Color.DarkOrange, Color.Yellow, Color.Gold, Color.Goldenrod, Color.GreenYellow, Color.Green, Color.DarkGreen, Color.White
-        };
+            Color.DarkRed};//, Color.Red, Color.OrangeRed, Color.Orange,  Color.DarkOrange, Color.Gold, Color.Yellow, Color.GreenYellow, Color.Green, Color.DarkGreen, Color.White
+        //};
         private Rectangle hitRegion;
         private Emitter explodeEmitter;
         public Player.Side IsFacing {get; private set;}
@@ -98,7 +98,7 @@ namespace SkyBall.Entity
                     speedY = Ball.MIN_SPEED;
                 }
 
-                Life -= (int) Math.Ceiling(Math.Abs(ball.Speed.Y) / 5);
+                Life -= (int) Math.Ceiling(Math.Abs(ball.Speed.Y) / 7);
                 if (Life < 0)
                 {
                     IsVisible = false;

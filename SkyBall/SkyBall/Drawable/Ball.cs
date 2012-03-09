@@ -9,7 +9,6 @@ using X2DPE.Helpers;
 using SkyBall.X2DPE;
 using SkyBall.Core;
 using SkyBall.Config;
-//using PongFS.Particles;
 
 namespace SkyBall.Drawable
 {
@@ -24,7 +23,7 @@ namespace SkyBall.Drawable
 
         public Ball(string id) : base(id, TextureFactory.getFactory().Get("ball")) {
             InitParticleEmitters();
-            Speed = new Vector2(-1, START_SPEED);
+            Speed = new Vector2((float) Tools.Rnd.NextDouble() * 4 - 2, START_SPEED);
             PlaceCenterAt(GameConfig.WIDTH / 2, GameConfig.HEIGHT / 2);
             Bounds = new Rectangle(GameConfig.WIN_BORDER, 0, GameConfig.WIDTH - Width - GameConfig.WIN_BORDER, GameConfig.HEIGHT);
             BounceOffBounds = true; // for now

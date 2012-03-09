@@ -53,7 +53,6 @@ F:\code\c\SkyBall\SkyBall\SkyBall\bin\x86\Debug\Content\images\wall.xnb
 F:\code\c\SkyBall\SkyBall\SkyBall\bin\x86\Debug\Content\images\plasma.xnb
 F:\code\c\SkyBall\SkyBall\SkyBall\bin\x86\Debug\Content\images\smoke.xnb
 F:\code\c\SkyBall\SkyBall\SkyBall\bin\x86\Debug\Content\images\spark.xnb
-F:\code\c\SkyBall\SkyBall\SkyBall\bin\x86\Debug\Content\images\spark2.xnb
 F:\code\c\SkyBall\SkyBall\SkyBall\bin\x86\Debug\Content\images\shadow.xnb
 F:\code\c\SkyBall\SkyBall\SkyBall\bin\x86\Debug\Content\images\ray.xnb
 F:\code\c\SkyBall\SkyBall\SkyBall\bin\x86\Debug\Content\images\powerups.xnb

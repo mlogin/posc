@@ -145,11 +145,12 @@ namespace SkyBall
                 if (screen.ScreenState == ScreenState.TransitionOn ||
                     screen.ScreenState == ScreenState.Active)
                 {
+                    screen.HandleInput(input);
+
                     // If this is the first active screen we came across,
                     // give it a chance to handle input.
                     if (!otherScreenHasFocus)
                     {
-                        screen.HandleInput(input);
 
                         otherScreenHasFocus = true;
                     }

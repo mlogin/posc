@@ -12,7 +12,7 @@ namespace SkyBall
     /// </summary>
     abstract class MenuScreen : GameScreen
     {
-        List<MenuEntry> menuEntries = new List<MenuEntry>();
+        List<MenuLabel> menuItems = new List<MenuLabel>();
         int selectedEntry = 0;
         string menuTitle;
 
@@ -20,9 +20,9 @@ namespace SkyBall
         /// Gets the list of menu entries, so derived classes can add
         /// or change the menu contents.
         /// </summary>
-        protected IList<MenuEntry> MenuEntries
+        protected IList<MenuLabel> MenuEntries
         {
-            get { return menuEntries; }
+            get { return menuItems; }
         }
 
         /// <summary>
@@ -36,6 +36,11 @@ namespace SkyBall
             TransitionOffTime = TimeSpan.FromSeconds(0.5);
         }
 
+        public void SelectMenuEntryIndex(int index)
+        {
+            selectedEntry = index;
+        }
+
         /// <summary>
         /// Responds to user input, changing the selected entry and accepting
         /// or cancelling the menu.
@@ -45,19 +50,35 @@ namespace SkyBall
             // Move to the previous menu entry?
             if (input.IsMenuUp(ControllingPlayer))
             {
-                selectedEntry--;
-
-                if (selectedEntry < 0)
-                    selectedEntry = menuEntries.Count - 1;
+                bool loop = true;
+                while (loop)
+                {
+                    selectedEntry--;
+                    if (selectedEntry < 0)
+                    {
+                        selectedEntry = menuItems.Count - 1;
+                    }
+                    if (menuItems[selectedEntry] is MenuEntry)
+                    {
+                        loop = false;
+                    }
+                }
             }
 
             // Move to the next menu entry?
             if (input.IsMenuDown(ControllingPlayer))
             {
-                selectedEntry++;
-
-                if (selectedEntry >= menuEntries.Count)
-                    selectedEntry = 0;
+                bool loop = true;
+                while(loop){
+                    selectedEntry++;
+                    if (selectedEntry >= menuItems.Count){
+                        selectedEntry = 0;
+                    }
+                    if (menuItems[selectedEntry] is MenuEntry)
+                    {
+                        loop = false;
+                    }
+                }
             }
 
             // Accept or cancel the menu? We pass in our ControllingPlayer, which may
@@ -83,7 +104,7 @@ namespace SkyBall
         /// </summary>
         protected virtual void OnSelectEntry(int entryIndex, PlayerIndex playerIndex)
         {
-            menuEntries[entryIndex].OnSelectEntry(playerIndex);
+            ((MenuEntry)menuItems[entryIndex]).OnSelectEntry(playerIndex);
         }
 
 
@@ -116,15 +137,15 @@ namespace SkyBall
             float transitionOffset = (float)Math.Pow(TransitionPosition, 2);
 
             // start at Y = 175; each X value is generated per entry
-            Vector2 position = new Vector2(0f, 175f);
+            Vector2 position = new Vector2(0f, 185f);
 
             // update each menu entry's location in turn
-            for (int i = 0; i < menuEntries.Count; i++)
+            for (int i = 0; i < menuItems.Count; i++)
             {
-                MenuEntry menuEntry = menuEntries[i];
+                MenuLabel menuLabel = menuItems[i];
                 
                 // each entry is to be centered horizontally
-                position.X = 270;
+                position.X = 230;
 
                 if (ScreenState == ScreenState.TransitionOn)
                     position.X -= transitionOffset * 256;
@@ -132,10 +153,10 @@ namespace SkyBall
                     position.X += transitionOffset * 512;
 
                 // set the entry's position
-                menuEntry.Position = position;
+                menuLabel.Position = position;
 
                 // move down for the next entry the size of this entry
-                position.Y += menuEntry.GetHeight(this);
+                position.Y += menuLabel.GetHeight(this);
             }
         }
 
@@ -149,11 +170,17 @@ namespace SkyBall
             base.Update(gameTime, otherScreenHasFocus, coveredByOtherScreen);
 
             // Update each nested MenuEntry object.
-            for (int i = 0; i < menuEntries.Count; i++)
+            for (int i = 0; i < menuItems.Count; i++)
             {
                 bool isSelected = IsActive && (i == selectedEntry);
-
-                menuEntries[i].Update(this, isSelected, gameTime);
+                if (menuItems[i] is MenuEntry)
+                {
+                    ((MenuEntry)menuItems[i]).Update(this, isSelected, gameTime);
+                }
+                else
+                {
+                    menuItems[i].Update(this, gameTime);
+                }
             }
         }
 
@@ -173,13 +200,19 @@ namespace SkyBall
             spriteBatch.Begin();
 
             // Draw each menu entry in turn.
-            for (int i = 0; i < menuEntries.Count; i++)
+            for (int i = 0; i < menuItems.Count; i++)
             {
-                MenuEntry menuEntry = menuEntries[i];
+                MenuLabel menuItem = menuItems[i];
 
-                bool isSelected = IsActive && (i == selectedEntry);
-
-                menuEntry.Draw(this, isSelected, gameTime);
+                if (menuItem is MenuEntry)
+                {
+                    bool isSelected = IsActive && (i == selectedEntry);
+                    ((MenuEntry)menuItem).Draw(this, isSelected, gameTime);
+                }
+                else
+                {
+                    menuItem.Draw(this, gameTime);
+                }
             }
 
             // Make the menu slide into place during transitions, using a

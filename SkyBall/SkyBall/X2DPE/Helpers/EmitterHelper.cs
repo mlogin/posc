@@ -2,13 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using SkyBall.Core;
 
 namespace X2DPE.Helpers
 {
 	class EmitterHelper
 	{
-		Random random = new Random();
-
 		public double RandomizedDouble(RandomMinMax randomMinMax)
 		{
 			double min = randomMinMax.Min;
@@ -17,7 +16,7 @@ namespace X2DPE.Helpers
 			if (min == max)
 				return max;
 			else
-				return min + (random.NextDouble() * (max - min));
+				return min + (Tools.Rnd.NextDouble() * (max - min));
 		}
 	}
 }

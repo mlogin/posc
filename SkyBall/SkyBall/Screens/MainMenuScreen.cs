@@ -1,4 +1,6 @@
 using Microsoft.Xna.Framework;
+using SkyBall.Config;
+using SkyBall.Core;
 
 namespace SkyBall
 {
@@ -22,6 +24,7 @@ namespace SkyBall
 
             // Hook up menu event handlers.
             playGameMenuEntry.Selected += PlayGameMenuEntrySelected;
+            mpGameMenuEntry.Selected += MpPlayGameMenuEntrySelected;
             optionsMenuEntry.Selected += OptionsMenuEntrySelected;
             exitMenuEntry.Selected += OnCancel;
 
@@ -32,11 +35,16 @@ namespace SkyBall
             MenuEntries.Add(exitMenuEntry);
         }
 
-        /// <summary>
-        /// Event handler for when the Play Game menu entry is selected.
-        /// </summary>
         void PlayGameMenuEntrySelected(object sender, PlayerIndexEventArgs e)
         {
+            GameConfig.Multiplayer = false;
+            LoadingScreen.Load(ScreenManager, true, e.PlayerIndex,
+                               new GameplayScreen());
+        }
+
+        void MpPlayGameMenuEntrySelected(object sender, PlayerIndexEventArgs e)
+        {
+            GameConfig.Multiplayer = true;
             LoadingScreen.Load(ScreenManager, true, e.PlayerIndex,
                                new GameplayScreen());
         }
@@ -56,7 +64,16 @@ namespace SkyBall
         /// </summary>
         protected override void OnCancel(PlayerIndex playerIndex)
         {
-            const string message = "Would you stay if I gave you 100$?";
+            string[] exitMsgs = new string[]{
+                "Would you stay if I gave you 100$?",
+                "Don't you love me back?",
+                "Please don't go... I love you...",
+                "If you leave I will crash",
+                "Tired of loosing?",
+                "They say loosers always quit"
+            };
+            
+            string message = exitMsgs[Tools.Rnd.Next(exitMsgs.Length - 1)];
 
             MessageBoxScreen confirmExitMessageBox = new MessageBoxScreen(message);
 

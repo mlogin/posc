@@ -36,6 +36,9 @@ namespace SkyBall
             graphics.PreferredBackBufferWidth = GameConfig.WIDTH;
             graphics.PreferredBackBufferHeight = GameConfig.HEIGHT;
 
+            // load options
+            GameConfig.LoadUserPrefs(Content.RootDirectory);
+
             // Create the screen manager component.
             screenManager = new ScreenManager(this);
 

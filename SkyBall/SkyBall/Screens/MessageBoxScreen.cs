@@ -34,8 +34,8 @@ namespace SkyBall
         public MessageBoxScreen(string message, bool includeUsageText)
         {
             const string usageText = "\nA button, Space, Enter = ok" +
-                                     "\nB button, Esc = cancel"; 
-            
+                                     "\nB button, Esc = cancel";
+
             if (includeUsageText)
                 this.message = message + usageText;
             else
@@ -132,6 +132,6 @@ namespace SkyBall
         }
 
 
-        
+
     }
 }

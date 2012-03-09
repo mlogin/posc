@@ -116,6 +116,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Config\GameConfig.cs" />
+    <Compile Include="Core\Tools.cs" />
+    <Compile Include="Config\UserConfig.cs" />
     <Compile Include="Core\ComponentFactory.cs" />
     <Compile Include="Core\TextureFactory.cs" />
     <Compile Include="Core\SoundFactory.cs" />
@@ -131,6 +133,9 @@
     <Compile Include="ScreenManager\InputState.cs" />
     <Compile Include="ScreenManager\ScreenManager.cs" />
     <Compile Include="Screens\BackgroundScreen.cs" />
+    <Compile Include="Screens\GetInputKeyMsgBoxScreen.cs" />
+    <Compile Include="Screens\MenuLabel.cs" />
+    <Compile Include="Screens\CustomizeKeysScreen.cs" />
     <Compile Include="Screens\GameplayScreen.cs" />
     <Compile Include="Screens\LoadingScreen.cs" />
     <Compile Include="Screens\MainMenuScreen.cs" />

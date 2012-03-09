@@ -74,16 +74,7 @@
       <Processor>TextureProcessor</Processor>
       <Options>None</Options>
       <Output>F:\code\c\SkyBall\SkyBall\SkyBall\bin\x86\Debug\Content\images\spark.xnb</Output>
-      <Time>2012-02-23T00:14:27.2073587+01:00</Time>
-    </Item>
-    <Item>
-      <Source>images\spark2.png</Source>
-      <Name>images\spark2</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-      <Options>None</Options>
-      <Output>F:\code\c\SkyBall\SkyBall\SkyBall\bin\x86\Debug\Content\images\spark2.xnb</Output>
-      <Time>2012-02-23T00:15:26.8267687+01:00</Time>
+      <Time>2012-03-01T02:14:19.8410011+01:00</Time>
     </Item>
     <Item>
       <Source>images\shadow.png</Source>

@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework.Input;
 
 namespace SkyBall.Config
 {
+    [Serializable]
     public class KeyboardLayout
     {
         public Default DefaultLayout { get; private set; }

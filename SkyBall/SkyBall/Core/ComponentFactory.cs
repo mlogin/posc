@@ -43,5 +43,10 @@ namespace SkyBall.Core
             idCounter++;
             return "cmp-" + idCounter.ToString();
         }
+
+        internal void RemoveAll()
+        {
+            components.Clear();
+        }
     }
 }
